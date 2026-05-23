@@ -2,57 +2,75 @@
 using System.Collections.Generic;
 using syntaxer;
 
-public class Program
+public  class Program
 {
     public static void Main()
     {
-        Console.ForegroundColor=ConsoleColor.White;
+        Console.ForegroundColor = ConsoleColor.White;
         var variables = new Dictionary<VariableSymbol, object>();
         var variableSymbols = new Dictionary<string, VariableSymbol>();
-        while (true)
-        {
-            
-        
-        var line = Console.ReadLine();
-        if (string.IsNullOrWhiteSpace(line))
-            return;
+        var programPath = Path.Combine(Directory.GetCurrentDirectory(), "program.txt");
 
-       syntaxer.Parser parser = new(line);
-        var expression = parser.parse();
-        PrettyPrint(expression);
+        if (!File.Exists(programPath))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Missing source file: {programPath}");
+            return;
+        }
+
+        var sourceText = File.ReadAllText(programPath);
+        if (string.IsNullOrWhiteSpace(sourceText))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Source file is empty: {programPath}");
+            return;
+        }
+
+        
+                syntaxer.Parser parser = new(sourceText);
+
+            var   expression = parser.parse();
+
+          //  var expression=parser.ParseCompilationUnit().getchildren();
+           
+        PrettyPrint( (SyntaxNode)expression);        
+        //var expression=parser.ParseCompilationUnit();
+        
+        
         if (parser.Diagnostics.Any())
         {
-            Console.ForegroundColor=ConsoleColor.Red;
-            foreach (var item in parser.Diagnostics)
+            Console.ForegroundColor = ConsoleColor.Red;
+            foreach (var item2 in parser.Diagnostics)
             {
-                System.Console.WriteLine(item);
+                System.Console.WriteLine(item2);
             }
-        }  
+        }
         else
         {
             var binder = new Binder(variableSymbols);
+          
             var boundExpression = binder.Bind(expression);
 
             if (binder.Diagnostics.Any())
             {
-                Console.ForegroundColor=ConsoleColor.Red;
-                foreach (var item in binder.Diagnostics)
+                Console.ForegroundColor = ConsoleColor.Red;
+                foreach (var item3 in binder.Diagnostics)
                 {
-                    System.Console.WriteLine(item);
+                    System.Console.WriteLine(item3);
                 }
 
-                continue;
+                return;
             }
 
-            BoundEvaluator evaluator=new(boundExpression, variables);
-            var result=evaluator.Evaluate();
+            BoundEvaluator evaluator = new(boundExpression, variables);
+            var result = evaluator.Evaluate();
             System.Console.WriteLine(result);
         }
-    }}
+    }
 
     public static void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = true)
     {
-                var marker = indent == "" ? "" : (isLast ? "+--" : "+--");
+        var marker = indent == "" ? "" : (isLast ? "+--" : "+--");
         Console.WriteLine($"{indent}{marker}{GetNodeLabel(node)}");
 
         indent += indent == "" ? "    " : (isLast ? "    " : "¦   ");
@@ -99,6 +117,6 @@ public class Program
             SyntaxKind.pipePipeToken => "PipePipeToken",
             _ => node.Kind.ToString()
         };
-    }
-}
+}}
+
 

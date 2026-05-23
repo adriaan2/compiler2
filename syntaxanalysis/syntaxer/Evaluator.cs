@@ -16,7 +16,9 @@ public class Evaluator
     {
         if (expression is numberSyntax n)
         {
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             return (int) n.Token.Value;
+#pragma warning restore CS8605 // Unboxing a possibly null value.
         }
 
         if (expression is BynarySyntax b)

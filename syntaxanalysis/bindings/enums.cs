@@ -2,6 +2,10 @@
 namespace bindings{
 internal enum Boundnodekind
     {
+        Expressionstatement,
+        Blockstatement,
+        Compilationunit,
+
         charexpression,
         Arrayexpression,
         Arrayindexexpression,
@@ -11,7 +15,9 @@ internal enum Boundnodekind
         Booleanexpression,
         Variableexpression,
         Assignmentexpression,
-        Variabledeclarationexpression
+        Variabledeclarationexpression,
+        Semicolonexpression,
+        ifexpression
     }
 internal enum Boundunaryoperatorkind
     {

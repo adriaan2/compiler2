@@ -112,6 +112,10 @@ internal sealed class BoundEvaluator
             _variables[declaration.Variable] = value;
             return value;
         }
+
+        if (node is Boundsemicolinexpression)
+            return null!;
+          
         
 
         throw new Exception($"Unexpected bound node {node.Boundnodekind}");
