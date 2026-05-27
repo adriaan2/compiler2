@@ -8,6 +8,7 @@ namespace syntaxer;
 public class Lexer
 {
         private readonly string _text;
+        
         private int _position;
         private readonly List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
@@ -15,6 +16,7 @@ public class Lexer
         public Lexer(string text)
         {
                 _text = text;
+                System.Console.WriteLine(text.Length);
         }
 
         private char Current
@@ -52,6 +54,7 @@ public class Lexer
         {
                 if (_position >= _text.Length)
                 {
+                        System.Console.WriteLine("df");
                         return new Syntaxtoken(SyntaxKind.endoffiletoken, _position, "\0", null);
                 }
 
@@ -86,6 +89,7 @@ public class Lexer
                                 SyntaxKind.falseKeyword => false,
                                 _ => null
                         };
+                        
 
                         return new Syntaxtoken(kind, start, text, value);
                 }
@@ -121,21 +125,25 @@ public class Lexer
                         var text = _text.Substring(start, length);
                         return new Syntaxtoken(SyntaxKind.whitespaceToken, start, text, null);
                 }
-                else if (Current == '{')
+                 if (Current == '{')
                 {
                         return new Syntaxtoken(SyntaxKind.opencurly, _position++, "{", null);
                 }
-                                else if (Current == '}')
+                 if (Current == '}')
                         {
-    return new Syntaxtoken(SyntaxKind.closedcurly, _position++, "}", null);
-}
+                                return new Syntaxtoken(SyntaxKind.closedcurly, _position++, "}", null);
+                        }
 
                 if (Current == '+')
                 {
+                        System.Console.WriteLine("array open");
+
                         return new Syntaxtoken(SyntaxKind.plusToken, _position++, "+", null);
                 }
                 else if (Current == '[')
                 {
+                                        System.Console.WriteLine("array open");
+
                         return new Syntaxtoken(SyntaxKind.openbracket, _position++, "[", null);
                 }
                 else if (Current == ']')

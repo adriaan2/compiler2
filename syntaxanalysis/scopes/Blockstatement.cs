@@ -1,7 +1,7 @@
 namespace syntaxer.scopes;
 
 using syntaxer;
-public  class BlockStatementSyntax:SyntaxNode
+public abstract class BlockStatementSyntax:SyntaxNode
 {
     public BlockStatementSyntax(Syntaxtoken openBrace, IReadOnlyList<LiteralExpressionsyntax> statements, Syntaxtoken closeBrace)
     {

@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Transactions;
-using System.Xml;
 using syntaxer.scopes;
+using bindings;
 
 namespace syntaxer;
 
@@ -16,7 +16,6 @@ public class Parser
         public Parser(string Text)
         {
                 
-                System.Console.WriteLine($"{Text.Length}");
                 Lexer lexer = new Lexer(Text);
                 Syntaxtoken syntaxtoken;
                 List<Syntaxtoken> tokens = new();
@@ -27,6 +26,7 @@ public class Parser
                         if (syntaxtoken.Kind != SyntaxKind.whitespaceToken && syntaxtoken.Kind != SyntaxKind.badtoken)
                         {
                                 tokens.Add(syntaxtoken);
+                                
                         }
                 } while (syntaxtoken.Kind != SyntaxKind.endoffiletoken);
 
@@ -63,12 +63,58 @@ public class Parser
                 return new Syntaxtoken(kind, Current.POsition, null, null);
         }
 
+        public CompilationUnitSyntax ParseCompilationUnit()
+        {
+                var statements = new List<LiteralExpressionsyntax>();
+
+                while (Current.Kind != SyntaxKind.endoffiletoken)
+                {
+                        
+                        if( Current.Kind == SyntaxKind.iftkeyword&&Peek(1).Kind==SyntaxKind.openbracket)
+                        {      
+                                 
+                        }
+
+                        if (Current.Kind == SyntaxKind.elsekeyword)
+                        {
+                                throw new NotImplementedException();
+                        } 
+                        
+                        if (Current.Kind == SyntaxKind.fortkeyword)
+                        {
+                                throw new NotImplementedException();
+                        } 
+                        if (Current.Kind == SyntaxKind.whilekeyword)
+                        {
+                                throw new NotImplementedException();
+                        }
+                        if (Current.Kind == SyntaxKind.semicolonToken)
+                        {
+                                Nexttoken();
+                                continue;
+                        }
+
+                        var startPosition = _position;
+                        statements.Add(ParseExpression());
+
+                        if (Current.Kind == SyntaxKind.semicolonToken)
+                                Nexttoken();
+
+                        if (_position == startPosition)
+                                Nexttoken();
+                }
+
+                var eof = match(SyntaxKind.endoffiletoken);
+                return new CompilationUnitSyntax(statements, eof);
+        }
+
         public LiteralExpressionsyntax parse()
         {
                 if (Current.Kind==SyntaxKind.semicolonToken)
                 {
                         
                 }
+                
                 return ParseExpression();
         }
 
@@ -242,17 +288,12 @@ public class Parser
                 var closeBracket = match(SyntaxKind.closebracket, "close bracket");
                 return new ArrayExpressionSyntax(openBracket, elements, closeBracket);
         }
-        public bool Iscompilationsyntax( )
-        {
-                return Current.Kind is SyntaxKind.iftkeyword || Current.Kind==SyntaxKind.elsekeyword || Current.Kind==SyntaxKind.openbracket;
-        }
+       
 
-        public bool subparser()
-        {
-                return Current.Kind == SyntaxKind.iftkeyword
-                        || Current.Kind == SyntaxKind.elsekeyword
-                        || Current.Kind == SyntaxKind.fortkeyword
-                        || Current.Kind == SyntaxKind.whilekeyword;
+        public void subparser()
+        { System.Console.WriteLine("4rfff");
+                       
+                        
         }
 
         
