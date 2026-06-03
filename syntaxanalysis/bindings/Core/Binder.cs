@@ -337,6 +337,7 @@ internal class Binder
         {
                 if (type == typeof(ArrayValue) && elementType is not null)
                         return $"{elementType.Name}[]";
+                        System.Console.WriteLine("displaytypename");
 
                 return type.Name;
         }

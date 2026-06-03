@@ -7,11 +7,13 @@ namespace syntaxer;
 
 public class Parser
 {
+        static bool subparsing=false;
         List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
         int _position = 0;
         public int Position => _position;
         readonly Syntaxtoken[] _tokens;
+        public compulatinglogic parentlogic;
 
         public Parser(string Text)
         {
@@ -69,12 +71,6 @@ public class Parser
 
                 while (Current.Kind != SyntaxKind.endoffiletoken)
                 {
-                        
-                        if( Current.Kind == SyntaxKind.iftkeyword&&Peek(1).Kind==SyntaxKind.openbracket)
-                        {      
-                                 
-                        }
-
                         if (Current.Kind == SyntaxKind.elsekeyword)
                         {
                                 throw new NotImplementedException();
@@ -107,27 +103,42 @@ public class Parser
                 var eof = match(SyntaxKind.endoffiletoken);
                 return new CompilationUnitSyntax(statements, eof);
         }
+        public void compulate(compulatinglogic compulatinglogic)
+        {
+                
+        }
 
         public LiteralExpressionsyntax parse()
         {
-                if (Current.Kind==SyntaxKind.semicolonToken)
-                {
-                        
-                }
                 
+                isscopekeyword(Current.Kind);
+                
+
                 return ParseExpression();
         }
 
         private LiteralExpressionsyntax ParseExpression()
-        {
+        {       
                 
                 if (IsTypeKeyword(Current.Kind))
                         return ParseVariableDeclaration();
 
                 if (Current.Kind == SyntaxKind.identifierToken && Peek(1).Kind == SyntaxKind.equalsToken)
                         return ParseAssignmentExpression();
-
+                if (Current.Kind==SyntaxKind.iftkeyword)
+                {
+                        
+                }
                 return ParseBinaryExpression();
+        }
+        private bool isscopekeyword(SyntaxKind Kind)
+        {
+                if (Kind==SyntaxKind.iftkeyword||Kind==SyntaxKind.fortkeyword||Kind==SyntaxKind.whilekeyword)
+                {
+                       return true;
+                }
+                return false;
+               
         }
 
         private LiteralExpressionsyntax ParseVariableDeclaration()
@@ -234,6 +245,7 @@ public class Parser
 
                 if (Current.Kind == SyntaxKind.trueKeyword || Current.Kind == SyntaxKind.falseKeyword)
                 {
+                        System.Console.WriteLine("boolean1");
                         var keywordToken = Nexttoken();
                         return new BooleanSyntax(keywordToken);
                 }
@@ -242,6 +254,11 @@ public class Parser
                 {
                         var identifierToken = Nexttoken();
                         return new NameExpressionSyntax(identifierToken);
+                }
+                if (Current.Kind==SyntaxKind.pipePipeToken)
+                {
+                       // System.Console.WriteLine("pipePipetoken");
+                       // var identifierToken=Nexttoken();
                 }
 
                 if (Current.Kind == SyntaxKind.charvaltoken)

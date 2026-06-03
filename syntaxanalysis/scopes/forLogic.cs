@@ -7,4 +7,10 @@ public sealed class forLogic : compulatinglogic
         {
                 
         }
+
+        public forLogic(string sourcetext, compulatinglogic parent)
+                : base(sourcetext, parent)
+        {
+                
+        }
 }

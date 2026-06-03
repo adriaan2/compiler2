@@ -3,11 +3,11 @@ namespace syntaxer;
 public enum SyntaxKind
 {
     ifexpression,
-    iftkeyword,
-    fortkeyword,
-    whilekeyword,
+    ifToken,
+    elseToken,
+    forToken,
+    whileToken,
     arraytoken,
-    elsekeyword,
     charkeyword,
     numberToken,
     openbracket,
@@ -50,5 +50,9 @@ public enum SyntaxKind
     semicolonToken,
     compilationunit,
     expressionstatement,
+    iftkeyword = ifToken,
+    elsekeyword = elseToken,
+    fortkeyword = forToken,
+    whilekeyword = whileToken,
 
 }

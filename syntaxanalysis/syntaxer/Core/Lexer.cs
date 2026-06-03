@@ -51,10 +51,11 @@ public class Lexer
         }
 
         public Syntaxtoken Lex()
+
         {
                 if (_position >= _text.Length)
                 {
-                        System.Console.WriteLine("df");
+                       
                         return new Syntaxtoken(SyntaxKind.endoffiletoken, _position, "\0", null);
                 }
 
@@ -76,10 +77,10 @@ public class Lexer
                                 "false" => SyntaxKind.falseKeyword,
                                 "int" => SyntaxKind.intKeyword,
                                 "bool" => SyntaxKind.boolKeyword,
-                                "if" => SyntaxKind.iftkeyword,
-                                "else" => SyntaxKind.elsekeyword,
-                                "for" => SyntaxKind.fortkeyword,
-                                "while" => SyntaxKind.whilekeyword,
+                                "if" => SyntaxKind.ifToken,
+                                "else" => SyntaxKind.elseToken,
+                                "for" => SyntaxKind.forToken,
+                                "while" => SyntaxKind.whileToken,
                                 _ => SyntaxKind.identifierToken
                         };
 
@@ -131,7 +132,7 @@ public class Lexer
                 }
                  if (Current == '}')
                         {
-                                return new Syntaxtoken(SyntaxKind.closedcurly, _position++, "}", null);
+                                return new Syntaxtoken(SyntaxKind.endoffiletoken, _position++, "}", null);
                         }
 
                 if (Current == '+')
@@ -163,6 +164,7 @@ public class Lexer
                 {
                         var position = _position;
                         _position += 2;
+                        System.Console.WriteLine("d");
                         return new Syntaxtoken(SyntaxKind.equalsEqualsToken, position, "==", null);
                 }
                 else if (Current == '-')
@@ -231,7 +233,8 @@ public class Lexer
 
                 if (Current == ';')
                 {
-                        return new Syntaxtoken(SyntaxKind.semicolonToken, _position++, ";", null);
+                        
+                        return new Syntaxtoken(SyntaxKind.endoffiletoken, _position++, ";", null);
                 }
 
                 _diagnostics.Add($"error bad character input in lexer last line {Current}");

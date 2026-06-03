@@ -28,7 +28,7 @@ public  class Program
         }
 
         var compulatinglogic = new compulatinglogic(sourceText);
-        var syntax = compulatinglogic.Parse();
+        var expressions = compulatinglogic.Parse();
 
         if (compulatinglogic.Diagnostics.Any())
         {
@@ -41,25 +41,31 @@ public  class Program
         else
         {
             var binder = new Binder(variableSymbols);
-            object? result = null;
+            var boundExpressions = new List<Boundexpression>();
 
-            foreach (var expression in syntax.Statements)
+            foreach (var expression in expressions)
             {
                 var boundExpression = binder.Bind(expression);
+                boundExpressions.Add(boundExpression);
+            }
 
-                if (binder.Diagnostics.Any())
+            if (binder.Diagnostics.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                foreach (var item3 in binder.Diagnostics)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    foreach (var item3 in binder.Diagnostics)
-                    {
-                        System.Console.WriteLine(item3);
-                    }
-
-                    return;
+                    System.Console.WriteLine(item3);
                 }
 
+                return;
+            }
+
+            object ? result = null;
+            foreach (var boundExpression in boundExpressions)
+            {
                 BoundEvaluator evaluator = new(boundExpression, variables);
                 result = evaluator.Evaluate();
+                System.Console.WriteLine($"{result}");
             }
             
         }

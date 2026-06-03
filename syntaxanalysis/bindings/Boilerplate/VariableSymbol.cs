@@ -2,7 +2,7 @@ using System;
 
 namespace bindings
 {
-    internal sealed class VariableSymbol
+    public sealed class VariableSymbol
     {
         public VariableSymbol(string name, Type type, Type? elementType = null)
         {

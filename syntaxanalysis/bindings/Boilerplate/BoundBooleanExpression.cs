@@ -7,6 +7,7 @@ namespace bindings
         public BoundBooleanexpression(bool value)
         {
             Value = value;
+            System.Console.WriteLine("boolean2");
         }
 
         public bool Value { get; }

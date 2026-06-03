@@ -6,4 +6,9 @@ public sealed class whileLogic : compulatinglogic
                 : base(sourcetext)
         {
         }
+
+        public whileLogic(string sourcetext, compulatinglogic parent)
+                : base(sourcetext, parent)
+        {
+        }
 }
