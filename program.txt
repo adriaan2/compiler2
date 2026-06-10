@@ -1,5 +1,13 @@
-bool b=true;
-b;
-6+2;
-int i=6+2;
-i==6+2
+int t=8;
+int r=9;
+r==t;
+{
+    6+8;
+    bool b=true;
+    t;
+    {6+9;
+    int t=9;
+    b;
+    }
+}
+

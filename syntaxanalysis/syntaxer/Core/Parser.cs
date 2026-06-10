@@ -6,14 +6,15 @@ using bindings;
 namespace syntaxer;
 
 public class Parser
-{
+{       private Syntaxtoken Current => Peek(0);
+
         static bool subparsing=false;
         List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
         int _position = 0;
         public int Position => _position;
         readonly Syntaxtoken[] _tokens;
-        public compulatinglogic parentlogic;
+        public Stack parentlogic;
 
         public Parser(string Text)
         {
@@ -53,65 +54,25 @@ public class Parser
                 return current;
         }
 
-        private Syntaxtoken Current => Peek(0);
 
         private Syntaxtoken match(SyntaxKind kind, string printable = "")
         {
                 if (Current.Kind == kind)
                         return Nexttoken();
 
-                System.Console.WriteLine(printable);
                 _diagnostics.Add($"Error unexpected token in parser {Current.Kind}");
                 return new Syntaxtoken(kind, Current.POsition, null, null);
         }
 
-        public CompilationUnitSyntax ParseCompilationUnit()
-        {
-                var statements = new List<LiteralExpressionsyntax>();
-
-                while (Current.Kind != SyntaxKind.endoffiletoken)
-                {
-                        if (Current.Kind == SyntaxKind.elsekeyword)
-                        {
-                                throw new NotImplementedException();
-                        } 
-                        
-                        if (Current.Kind == SyntaxKind.fortkeyword)
-                        {
-                                throw new NotImplementedException();
-                        } 
-                        if (Current.Kind == SyntaxKind.whilekeyword)
-                        {
-                                throw new NotImplementedException();
-                        }
-                        if (Current.Kind == SyntaxKind.semicolonToken)
-                        {
-                                Nexttoken();
-                                continue;
-                        }
-
-                        var startPosition = _position;
-                        statements.Add(ParseExpression());
-
-                        if (Current.Kind == SyntaxKind.semicolonToken)
-                                Nexttoken();
-
-                        if (_position == startPosition)
-                                Nexttoken();
-                }
-
-                var eof = match(SyntaxKind.endoffiletoken);
-                return new CompilationUnitSyntax(statements, eof);
-        }
-        public void compulate(compulatinglogic compulatinglogic)
-        {
-                
-        }
+  
+               
+        
+     
 
         public LiteralExpressionsyntax parse()
         {
                 
-                isscopekeyword(Current.Kind);
+          
                 
 
                 return ParseExpression();
@@ -119,6 +80,7 @@ public class Parser
 
         private LiteralExpressionsyntax ParseExpression()
         {       
+
                 
                 if (IsTypeKeyword(Current.Kind))
                         return ParseVariableDeclaration();
@@ -131,16 +93,7 @@ public class Parser
                 }
                 return ParseBinaryExpression();
         }
-        private bool isscopekeyword(SyntaxKind Kind)
-        {
-                if (Kind==SyntaxKind.iftkeyword||Kind==SyntaxKind.fortkeyword||Kind==SyntaxKind.whilekeyword)
-                {
-                       return true;
-                }
-                return false;
-               
-        }
-
+       
         private LiteralExpressionsyntax ParseVariableDeclaration()
         {
                 var typeClause = ParseTypeClause();
@@ -155,7 +108,6 @@ public class Parser
                 var keyword = Nexttoken();
                 Syntaxtoken? openBracket = null;
                 Syntaxtoken? closeBracket = null;
-                System.Console.WriteLine("hello world");
 
                 if (Current.Kind == SyntaxKind.openbracket && Peek(1).Kind == SyntaxKind.closebracket)
                 {
@@ -245,7 +197,6 @@ public class Parser
 
                 if (Current.Kind == SyntaxKind.trueKeyword || Current.Kind == SyntaxKind.falseKeyword)
                 {
-                        System.Console.WriteLine("boolean1");
                         var keywordToken = Nexttoken();
                         return new BooleanSyntax(keywordToken);
                 }

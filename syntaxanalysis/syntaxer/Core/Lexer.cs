@@ -16,7 +16,6 @@ public class Lexer
         public Lexer(string text)
         {
                 _text = text;
-                System.Console.WriteLine(text.Length);
         }
 
         private char Current
@@ -132,24 +131,19 @@ public class Lexer
                 }
                  if (Current == '}')
                         {
-                                return new Syntaxtoken(SyntaxKind.endoffiletoken, _position++, "}", null);
+                                return new Syntaxtoken(SyntaxKind.closedcurly, _position++, "}", null);
                         }
 
                 if (Current == '+')
                 {
-                        System.Console.WriteLine("array open");
-
                         return new Syntaxtoken(SyntaxKind.plusToken, _position++, "+", null);
                 }
                 else if (Current == '[')
                 {
-                                        System.Console.WriteLine("array open");
-
                         return new Syntaxtoken(SyntaxKind.openbracket, _position++, "[", null);
                 }
                 else if (Current == ']')
                 {
-                        System.Console.WriteLine("array close");
                         return new Syntaxtoken(SyntaxKind.closebracket, _position++, "]", null);
                 }
                 else if (Current == ',')
@@ -164,7 +158,6 @@ public class Lexer
                 {
                         var position = _position;
                         _position += 2;
-                        System.Console.WriteLine("d");
                         return new Syntaxtoken(SyntaxKind.equalsEqualsToken, position, "==", null);
                 }
                 else if (Current == '-')

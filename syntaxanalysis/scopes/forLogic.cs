@@ -1,6 +1,6 @@
   namespace syntaxer.scopes;
 
-public sealed class forLogic : compulatinglogic
+public sealed class forLogic : Stack
 {
         public forLogic(string sourcetext)
                 : base(sourcetext)
@@ -8,7 +8,7 @@ public sealed class forLogic : compulatinglogic
                 
         }
 
-        public forLogic(string sourcetext, compulatinglogic parent)
+        public forLogic(string sourcetext, Stack parent)
                 : base(sourcetext, parent)
         {
                 

@@ -1,6 +1,6 @@
 namespace syntaxer.scopes;
 
-public sealed class ifelseLogic : compulatinglogic
+public sealed class ifelseLogic : Stack
 {
         public ifelseLogic(string logic,string sourcetext)
                 : base(sourcetext)
@@ -9,7 +9,7 @@ public sealed class ifelseLogic : compulatinglogic
         }
       
 
-        public ifelseLogic(string logic, string sourcetext, compulatinglogic parent)
+        public ifelseLogic(string logic, string sourcetext, Stack parent)
                 : base(sourcetext, parent)
         {
                 

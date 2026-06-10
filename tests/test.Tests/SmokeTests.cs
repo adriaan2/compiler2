@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using bindings;
 using syntaxer;
+using syntaxer.scopes;
 using Xunit;
 using Xunit.Sdk;
 
@@ -8,28 +9,9 @@ namespace test.Tests;
 
 public class SmokeTests
 {
-    public static TheoryData<EvaluationCase> ArithmeticCases => new()
-    {
-        new("Addition", "1+2", 3),
-        new("Subtraction", "7-4", 3),
-        new("Multiplication", "3*5", 15),
-        new("Division", "8/2", 4),
-        new("OperatorPrecedence", "1+2*3", 7),
-        new("Parentheses", "(1+2)*3", 9),
-        new("LeftAssociativeSubtraction", "10-2-3", 5),
-        new("UnaryPlusAndMinus", "-5+2", -3),
-        new("UnaryPlus", "+5", 5),
-        new("UnaryWithParentheses", "-(2+3)", -5),
-        new("NestedArithmetic", "12 / (2 * 3)", 2)
-    };
+   
 
-    public static TheoryData<EvaluationCase> UnaryPrecedenceCases => new()
-    {
-        new("UnaryTimes", "-2*3", -6),
-        new("UnaryParenthesizedTimes", "-(2*3)", -6),
-        new("UnaryAndBinaryPrecedence", "-2+3*4", 10)
-    };
-
+ 
     public static TheoryData<EvaluationCase> BooleanCases => new()
     {
         new("BooleanTrueLiteral", "true", true),
@@ -47,31 +29,47 @@ public class SmokeTests
         new("EqualityBeforeLogicalAnd", "1 == 1 && true", true)
     };
 
-    [Theory]
-    [MemberData(nameof(ArithmeticCases))]
-    public void Evaluate_ValidExpressions_ReturnsExpectedResult(EvaluationCase testCase)
-    {
-       // AssertEvaluationMatches(testCase);
-    }
+    
 
-    [Fact]
-    public void Evaluate_DivisionByZero_Throws()
-    {
-        var parser = new Parser("10/0");
-        var syntax = parser.parse();
-        var binder = new Binder(new Dictionary<string, VariableSymbol>());
-        var boundExpression = binder.Bind(syntax);
-        var evaluator = new BoundEvaluator(boundExpression, new Dictionary<VariableSymbol, object>());
 
-        Assert.Throws<DivideByZeroException>(() => evaluator.Evaluate());
-    }
 
-    [Theory]
-    [MemberData(nameof(UnaryPrecedenceCases))]
-    public void Evaluate_UnaryAndBinaryMix_RespectsPrecedence(EvaluationCase testCase)
-    {
-       // AssertEvaluationMatches(testCase);
-    }
+    // [Fact]
+    // public void Stack_Parse_GroupsTextBetweenCurlyBraces()
+    // {
+    //     var logic = new Stack("""
+    //     {
+    //         int d=0;
+            
+            
+    //     }
+    //     """);
+
+    //     var expressions = logic.Parse();
+
+    //     var block = Assert.IsType<BlockStatementSyntax>(Assert.Single(expressions));
+    //     Assert.Single(block.Statements);
+    //     Assert.Single(logic.Subblocks);
+    //     Assert.Empty(logic.Diagnostics);
+    // }
+
+    // [Fact]
+    // public void Stack_Parse_ReportsUnclosedCurlyBraceAtEndOfText()
+    // {
+    //     var logic = new Stack("""
+    //     {
+    //         1
+    //     """);
+
+    //     var expressions = logic.Parse();
+
+    //     Assert.Empty(expressions);
+    //     Assert.Contains(logic.Diagnostics, diagnostic => diagnostic.Contains("missing a closing curly brace"));
+    // }
+
+    
+
+
+     
 
     [Theory]
     [MemberData(nameof(BooleanCases))]

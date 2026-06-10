@@ -1,16 +1,22 @@
 using bindings;
 using syntaxer;
+using syntaxer.scopes;
 
 internal class Binder
 {
-        private readonly Dictionary<string, VariableSymbol> _variables;
+        private readonly Stack _scope;
         private readonly List<string> _diagnostocs = new();
 
         public IEnumerable<string> Diagnostics => _diagnostocs;
 
-        public Binder(Dictionary<string, VariableSymbol> variables)
+        public Binder(Stack scope)
         {
-                _variables = variables;
+                _scope = scope;
+        }
+
+        public Binder(Dictionary<string, VariableSymbol> variables)
+                : this(new Stack(variables))
+        {
         }
 
         public Boundexpression Bind(LiteralExpressionsyntax expressionsyntax)
@@ -65,7 +71,7 @@ internal class Binder
         private Boundexpression Bindnameexpression(NameExpressionSyntax expressionsyntax)
         {
                 var name = expressionsyntax.IdentifierToken.Text ?? string.Empty;
-                if (!_variables.TryGetValue(name, out var variable))
+                if (!_scope.TryLookupVariable(name, out var variable))
                 {
                         _diagnostocs.Add($"Variable '{name}' does not exist.");
                         return new BoundNumberexpression(0);
@@ -79,7 +85,7 @@ internal class Binder
                 var name = expressionsyntax.IdentifierToken.Text ?? string.Empty;
                 var boundExpression = Bind(expressionsyntax.Expression);
 
-                if (!_variables.TryGetValue(name, out var variable))
+                if (!_scope.TryLookupVariable(name, out var variable))
                 {
                         _diagnostocs.Add($"Variable '{name}' does not exist.");
                         return boundExpression;
@@ -100,7 +106,7 @@ internal class Binder
                 var initializer = Bind(expressionsyntax.Initializer);
                 var (variableType, elementType) = BindTypeClause(expressionsyntax.TypeClause);
 
-                if (_variables.ContainsKey(name))
+                if (_scope.VariableSymbols.ContainsKey(name))
                 {
                         _diagnostocs.Add($"Variable '{name}' is already declared.");
                         return initializer;
@@ -113,7 +119,7 @@ internal class Binder
                 }
 
                 var variable = new VariableSymbol(name, variableType, elementType);
-                _variables.Add(name, variable);
+                _scope.VariableSymbols.Add(name, variable);
                 return new BoundVariabledeclarationexpression(variable, initializer);
         }
 
@@ -337,7 +343,6 @@ internal class Binder
         {
                 if (type == typeof(ArrayValue) && elementType is not null)
                         return $"{elementType.Name}[]";
-                        System.Console.WriteLine("displaytypename");
 
                 return type.Name;
         }
