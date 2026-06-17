@@ -1,13 +1,12 @@
-int t=8;
-int r=9;
-r==t;
+if (false);
 {
-    6+8;
-    bool b=true;
-    t;
-    {6+9;
-    int t=9;
-    b;
-    }
+    int skipped=1;
 }
+int q=9
+if (true)
+{
+    int entered=2;
+    int d=entered+q;
 
+
+}

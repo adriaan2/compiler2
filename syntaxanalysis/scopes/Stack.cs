@@ -14,6 +14,9 @@ public class Stack
     private readonly string _sourcetext = null;
     private readonly List<string> _diagnostics = new();
     private readonly List<Stack> _subblocks = new();
+    // Set true when an if-statement's condition evaluates to false; the next
+    // brace block is then skipped instead of being parsed and bound.
+    private bool _skipNextBlock = false;
     Dictionary<VariableSymbol,object> Variables=new();
     public Dictionary<string, VariableSymbol> VariableSymbols=new();
 
@@ -83,7 +86,18 @@ public class Stack
                     depth--;
                     if (depth == 0)
                     {
-                        ParseBlock(blockText.ToString(), expressions);
+                        // A false if-condition skips the whole block: the text is
+                        // discarded instead of being recursed into and bound.
+                        if (_skipNextBlock)
+                        {
+                            System.Console.WriteLine("if condition was false, skipping block");
+                            System.Console.WriteLine();
+                            _skipNextBlock = false;
+                        }
+                        else
+                        {
+                            ParseBlock(blockText.ToString(), expressions);
+                        }
                         blockText.Clear();
                         continue;
                     }
@@ -122,10 +136,32 @@ public class Stack
         expressions.Add(expression);
 
         PrettyPrint(expression);
+
+        // An if-statement binds and evaluates its condition here; when the
+        // condition is false the following block is flagged to be skipped.
+        if (expression is Ifsyntax ifStatement)
+        {
+            BindIfStatement(ifStatement);
+            System.Console.WriteLine();
+            return;
+        }
+
         Binder binder = new(this);
         binder.Bind(expression);
         _diagnostics.AddRange(binder.Diagnostics);
         System.Console.WriteLine();
+    }
+
+    private void BindIfStatement(Ifsyntax ifStatement)
+    {
+        Binder binder = new(this);
+        // The binder evaluates the boolean condition; a false result flags the
+        // following block to be skipped rather than recursed into.
+        var enterBlock = binder.ShouldEnterIfBlock(ifStatement, Variables);
+        _diagnostics.AddRange(binder.Diagnostics);
+
+        if (!enterBlock)
+            _skipNextBlock = true;
     }
 
     private void ParseBlock(string blockText, List<LiteralExpressionsyntax> expressions)

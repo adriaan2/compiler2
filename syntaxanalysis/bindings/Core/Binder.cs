@@ -45,6 +45,8 @@ internal class Binder
                                 return Bindarrayexpression((ArrayExpressionSyntax)expressionsyntax);
                         case SyntaxKind.arrayindexexpression:
                                 return Bindarrayindexexpression((ArrayIndexExpressionSyntax)expressionsyntax);
+                        case SyntaxKind.ifexpression:
+                                return Bindifexpression((Ifsyntax)expressionsyntax);
                         default:
                                 throw new Exception($"unkown syntax{expressionsyntax.Kind}");
                 }
@@ -61,6 +63,28 @@ internal class Binder
                 }
 
                 return new Boundunaryexpression(boundOperatorKind, boundOperand);
+        }
+
+        private Boundexpression Bindifexpression(Ifsyntax expressionsyntax)
+        {
+                var condition = Bind(expressionsyntax.Condition);
+                if (condition.Type != typeof(bool))
+                        _diagnostocs.Add("if condition must be a boolean expression");
+
+                return new BoundIfexpression(condition);
+        }
+
+        // Binds an if-statement and evaluates its condition. Returns true when the
+        // condition is true (the block should be entered), false when it is false
+        // (the caller should skip the block instead of recursing into it).
+        public bool ShouldEnterIfBlock(Ifsyntax ifStatement, Dictionary<VariableSymbol, object> variables)
+        {
+                var bound = (BoundIfexpression)Bindifexpression(ifStatement);
+                if (bound.Condition.Type != typeof(bool))
+                        return false;
+
+                var value = new BoundEvaluator(bound.Condition, variables).Evaluate();
+                return value is bool result && result;
         }
 
         private Boundexpression Bindparenthesizedsyntax(Parenthessese expressionsyntax)

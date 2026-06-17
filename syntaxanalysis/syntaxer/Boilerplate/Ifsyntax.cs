@@ -1,22 +1,28 @@
 using syntaxer;
 
-sealed class Ifsyntax:LiteralExpressionsyntax
+namespace syntaxer;
+
+// An if statement made of, in order: the `if` token, a boolean (condition)
+// expression, and the closing `;` token.
+public sealed class Ifsyntax : LiteralExpressionsyntax
 {
-    public override SyntaxKind Kind=>SyntaxKind.ifToken;
-
-    public Parenthessese Paranthese { get; }
-    public BooleanSyntax BooleanSyntaxp { get; }
-
-    public Ifsyntax(Parenthessese parenthessese ,BooleanSyntax booleanSyntax)
+    public Ifsyntax(Syntaxtoken ifToken, LiteralExpressionsyntax condition, Syntaxtoken semicolonToken)
     {
-        Paranthese=parenthessese;
-        BooleanSyntaxp=booleanSyntax;
+        IfToken = ifToken;
+        Condition = condition;
+        SemicolonToken = semicolonToken;
     }
-    
+
+    public Syntaxtoken IfToken { get; }
+    public LiteralExpressionsyntax Condition { get; }
+    public Syntaxtoken SemicolonToken { get; }
+
+    public override SyntaxKind Kind => SyntaxKind.ifexpression;
+
     public override IEnumerable<SyntaxNode> getchildren()
     {
-        yield return Paranthese;
-        yield return BooleanSyntaxp;
-        
+        yield return IfToken;
+        yield return Condition;
+        yield return SemicolonToken;
     }
 }

@@ -88,12 +88,20 @@ public class Parser
                 if (Current.Kind == SyntaxKind.identifierToken && Peek(1).Kind == SyntaxKind.equalsToken)
                         return ParseAssignmentExpression();
                 if (Current.Kind==SyntaxKind.iftkeyword)
-                {
-                        
-                }
+                        return ParseIfStatement();
                 return ParseBinaryExpression();
         }
        
+        private LiteralExpressionsyntax ParseIfStatement()
+        {
+                var ifToken = match(SyntaxKind.iftkeyword, "if");
+                var condition = ParseBinaryExpression();
+                // The lexer represents the closing ';' as the end-of-file token, so
+                // that is what closes the statement here.
+                var semicolon = match(SyntaxKind.endoffiletoken, "semicolon");
+                return new Ifsyntax(ifToken, condition, semicolon);
+        }
+
         private LiteralExpressionsyntax ParseVariableDeclaration()
         {
                 var typeClause = ParseTypeClause();
@@ -258,11 +266,6 @@ public class Parser
         }
        
 
-        public void subparser()
-        { System.Console.WriteLine("4rfff");
-                       
-                        
-        }
-
+        
         
 }
