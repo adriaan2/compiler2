@@ -1,11 +1,19 @@
 namespace syntaxer.scopes;
 
-public sealed class sentenceunits
+public sealed class sentenceunits:LiteralExpressionsyntax
 {
-    public sentenceunits(IReadOnlyList<StatementSyntax> statements)
+    public sentenceunits(IReadOnlyList<LiteralExpressionsyntax> statements)
     {
         Statements = statements;
     }
 
-    public IReadOnlyList<StatementSyntax> Statements { get; }
+    public IReadOnlyList<LiteralExpressionsyntax> Statements { get; }
+
+    public override SyntaxKind Kind => throw new NotImplementedException();
+
+    public override IEnumerable<SyntaxNode> getchildren()
+    {
+        throw new NotImplementedException();
+    }
+
 }

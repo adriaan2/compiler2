@@ -1,22 +1,24 @@
 using System.ComponentModel;
 using System.Transactions;
-using System.Xml;
 using syntaxer.scopes;
+using bindings;
 
 namespace syntaxer;
 
 public class Parser
-{
+{       private Syntaxtoken Current => Peek(0);
+
+        static bool subparsing=false;
         List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
         int _position = 0;
         public int Position => _position;
         readonly Syntaxtoken[] _tokens;
+        public Stack parentlogic;
 
         public Parser(string Text)
         {
                 
-                System.Console.WriteLine($"{Text.Length}");
                 Lexer lexer = new Lexer(Text);
                 Syntaxtoken syntaxtoken;
                 List<Syntaxtoken> tokens = new();
@@ -27,6 +29,7 @@ public class Parser
                         if (syntaxtoken.Kind != SyntaxKind.whitespaceToken && syntaxtoken.Kind != SyntaxKind.badtoken)
                         {
                                 tokens.Add(syntaxtoken);
+                                
                         }
                 } while (syntaxtoken.Kind != SyntaxKind.endoffiletoken);
 
@@ -51,37 +54,52 @@ public class Parser
                 return current;
         }
 
-        private Syntaxtoken Current => Peek(0);
 
         private Syntaxtoken match(SyntaxKind kind, string printable = "")
         {
                 if (Current.Kind == kind)
                         return Nexttoken();
 
-                System.Console.WriteLine(printable);
                 _diagnostics.Add($"Error unexpected token in parser {Current.Kind}");
                 return new Syntaxtoken(kind, Current.POsition, null, null);
         }
 
+  
+               
+        
+     
+
         public LiteralExpressionsyntax parse()
         {
-                if (Current.Kind==SyntaxKind.semicolonToken)
-                {
-                        
-                }
+                
+          
+                
+
                 return ParseExpression();
         }
 
         private LiteralExpressionsyntax ParseExpression()
-        {
+        {       
+
                 
                 if (IsTypeKeyword(Current.Kind))
                         return ParseVariableDeclaration();
 
                 if (Current.Kind == SyntaxKind.identifierToken && Peek(1).Kind == SyntaxKind.equalsToken)
                         return ParseAssignmentExpression();
-
+                if (Current.Kind==SyntaxKind.iftkeyword)
+                        return ParseIfStatement();
                 return ParseBinaryExpression();
+        }
+       
+        private LiteralExpressionsyntax ParseIfStatement()
+        {
+                var ifToken = match(SyntaxKind.iftkeyword, "if");
+                var condition = ParseBinaryExpression();
+                // The lexer represents the closing ';' as the end-of-file token, so
+                // that is what closes the statement here.
+                var semicolon = match(SyntaxKind.endoffiletoken, "semicolon");
+                return new Ifsyntax(ifToken, condition, semicolon);
         }
 
         private LiteralExpressionsyntax ParseVariableDeclaration()
@@ -98,7 +116,6 @@ public class Parser
                 var keyword = Nexttoken();
                 Syntaxtoken? openBracket = null;
                 Syntaxtoken? closeBracket = null;
-                System.Console.WriteLine("hello world");
 
                 if (Current.Kind == SyntaxKind.openbracket && Peek(1).Kind == SyntaxKind.closebracket)
                 {
@@ -197,6 +214,11 @@ public class Parser
                         var identifierToken = Nexttoken();
                         return new NameExpressionSyntax(identifierToken);
                 }
+                if (Current.Kind==SyntaxKind.pipePipeToken)
+                {
+                       // System.Console.WriteLine("pipePipetoken");
+                       // var identifierToken=Nexttoken();
+                }
 
                 if (Current.Kind == SyntaxKind.charvaltoken)
                 {
@@ -242,18 +264,8 @@ public class Parser
                 var closeBracket = match(SyntaxKind.closebracket, "close bracket");
                 return new ArrayExpressionSyntax(openBracket, elements, closeBracket);
         }
-        public bool Iscompilationsyntax( )
-        {
-                return Current.Kind is SyntaxKind.iftkeyword || Current.Kind==SyntaxKind.elsekeyword || Current.Kind==SyntaxKind.openbracket;
-        }
+       
 
-        public bool subparser()
-        {
-                return Current.Kind == SyntaxKind.iftkeyword
-                        || Current.Kind == SyntaxKind.elsekeyword
-                        || Current.Kind == SyntaxKind.fortkeyword
-                        || Current.Kind == SyntaxKind.whilekeyword;
-        }
-
+        
         
 }

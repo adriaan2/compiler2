@@ -1,10 +1,12 @@
-1 + 2;
-int i=6;
-char c='6';
-i+3;
-char [] d=['d' ,'d' ,'e'];
-d[0];
-if (i+6=9){
-    char d=8;
+if (false);
+{
+    int skipped=1;
 }
+int q=9
+if (true)
+{
+    int entered=2;
+    int d=entered+q;
 
+
+}

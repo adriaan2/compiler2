@@ -19,10 +19,12 @@ internal sealed class BoundEvaluator
     private  object EvaluateExpression(Boundexpression node)
     {
         if (node is BoundNumberexpression number)
+
             return number.Value;
 
         if (node is BoundBooleanexpression boolean)
-            return boolean.Value;
+            {System.Console.WriteLine($"{boolean.Value}");
+            return boolean.Value;}
 
         if (node is BoundArrayexpression arrayExpression)
         {
@@ -40,6 +42,7 @@ internal sealed class BoundEvaluator
             switch (unary.Operatorkind)
             {
                 case Boundunaryoperatorkind.Identity:
+                    System.Console.WriteLine($"{operand}");
                     return (int)operand;
                 case Boundunaryoperatorkind.Negation:
                     return -(int)operand;
