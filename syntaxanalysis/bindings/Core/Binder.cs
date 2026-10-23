@@ -4,18 +4,18 @@ using syntaxer.scopes;
 
 internal class Binder
 {
-        private readonly Stack _scope;
+        private readonly ScopeParser _scope;
         private readonly List<string> _diagnostocs = new();
 
         public IEnumerable<string> Diagnostics => _diagnostocs;
 
-        public Binder(Stack scope)
+        public Binder(ScopeParser scope)
         {
                 _scope = scope;
         }
 
         public Binder(Dictionary<string, VariableSymbol> variables)
-                : this(new Stack(variables))
+                : this(new ScopeParser(variables))
         {
         }
 
@@ -23,29 +23,29 @@ internal class Binder
         {
                 switch (expressionsyntax.Kind)
                 {
-                        case SyntaxKind.numberexpression:
+                        case GuidanceSignalKind.numberexpression:
                                 return Bindnumberexpression((numberSyntax)expressionsyntax);
-                        case SyntaxKind.booleanexpression:
+                        case GuidanceSignalKind.booleanexpression:
                                 return Bindbooleanexpression((BooleanSyntax)expressionsyntax);
-                        case SyntaxKind.binaryexpression:
+                        case GuidanceSignalKind.binaryexpression:
                                 return Bindbinarysyntax((BynarySyntax)expressionsyntax);
-                        case SyntaxKind.unaryexpression:
+                        case GuidanceSignalKind.unaryexpression:
                                 return Bindunarysyntax((UnarySyntax)expressionsyntax);
-                        case SyntaxKind.bracketexpression:
+                        case GuidanceSignalKind.bracketexpression:
                                 return Bindparenthesizedsyntax((Parenthessese)expressionsyntax);
-                        case SyntaxKind.nameexpression:
+                        case GuidanceSignalKind.nameexpression:
                                 return Bindnameexpression((NameExpressionSyntax)expressionsyntax);
-                        case SyntaxKind.assignmentexpression:
+                        case GuidanceSignalKind.assignmentexpression:
                                 return Bindassignmentexpression((AssignmentExpressionSyntax)expressionsyntax);
-                        case SyntaxKind.variabledeclarationexpression:
+                        case GuidanceSignalKind.variabledeclarationexpression:
                                 return Bindvariabledeclaration((VariableDeclarationSyntax)expressionsyntax);
-                        case SyntaxKind.charvaltoken:
+                        case GuidanceSignalKind.charvaltoken:
                                 return bindcharexpression((Charsyntax)expressionsyntax);
-                        case SyntaxKind.arrayexpression:
+                        case GuidanceSignalKind.arrayexpression:
                                 return Bindarrayexpression((ArrayExpressionSyntax)expressionsyntax);
-                        case SyntaxKind.arrayindexexpression:
+                        case GuidanceSignalKind.arrayindexexpression:
                                 return Bindarrayindexexpression((ArrayIndexExpressionSyntax)expressionsyntax);
-                        case SyntaxKind.ifexpression:
+                        case GuidanceSignalKind.ifexpression:
                                 return Bindifexpression((Ifsyntax)expressionsyntax);
                         default:
                                 throw new Exception($"unkown syntax{expressionsyntax.Kind}");
@@ -83,7 +83,7 @@ internal class Binder
                 if (bound.Condition.Type != typeof(bool))
                         return false;
 
-                var value = new BoundEvaluator(bound.Condition, variables).Evaluate();
+                var value = new Evaluator(bound.Condition, variables).Evaluate();
                 return value is bool result && result;
         }
 
@@ -127,14 +127,17 @@ internal class Binder
         private Boundexpression Bindvariabledeclaration(VariableDeclarationSyntax expressionsyntax)
         {
                 var name = expressionsyntax.Identifier.Text ?? string.Empty;
+
+                // A name already visible from this scope or one of its parents
+                // cannot be declared again. Sibling scopes remain independent.
+                if (_scope.TryLookupVariable(name, out _))
+                {
+                        _diagnostocs.Add($"Variable '{name}' is already declared in this or an enclosing scope.");
+                        return new BoundNumberexpression(0);
+                }
+
                 var initializer = Bind(expressionsyntax.Initializer);
                 var (variableType, elementType) = BindTypeClause(expressionsyntax.TypeClause);
-
-                if (_scope.VariableSymbols.ContainsKey(name))
-                {
-                        _diagnostocs.Add($"Variable '{name}' is already declared.");
-                        return initializer;
-                }
 
                 if (!AreTypesCompatible(variableType, elementType, initializer))
                 {
@@ -151,9 +154,9 @@ internal class Binder
         {
                 var baseType = typeClause.Keyword.Kind switch
                 {
-                        SyntaxKind.intKeyword => typeof(int),
-                        SyntaxKind.boolKeyword => typeof(bool),
-                        SyntaxKind.charkeyword => typeof(char),
+                        GuidanceSignalKind.intKeyword => typeof(int),
+                        GuidanceSignalKind.boolKeyword => typeof(bool),
+                        GuidanceSignalKind.charkeyword => typeof(char),
                         _ => throw new Exception($"Unexpected type keyword {typeClause.Keyword.Kind}")
                 };
 
@@ -235,23 +238,23 @@ internal class Binder
                 return new BoundArrayindexexpression(array, index, elementType);
         }
 
-        private BoundBinaryoperatorkind bindbinaryoperatorkind(SyntaxKind kind)
+        private BoundBinaryoperatorkind bindbinaryoperatorkind(GuidanceSignalKind kind)
         {
                 switch (kind)
                 {
-                        case SyntaxKind.plusToken:
+                        case GuidanceSignalKind.plusToken:
                                 return BoundBinaryoperatorkind.addition;
-                        case SyntaxKind.minusToken:
+                        case GuidanceSignalKind.minusToken:
                                 return BoundBinaryoperatorkind.subtraction;
-                        case SyntaxKind.timestoken:
+                        case GuidanceSignalKind.timestoken:
                                 return BoundBinaryoperatorkind.times;
-                        case SyntaxKind.slashtoken:
+                        case GuidanceSignalKind.slashtoken:
                                 return BoundBinaryoperatorkind.division;
-                        case SyntaxKind.equalsEqualsToken:
+                        case GuidanceSignalKind.equalsEqualsToken:
                                 return BoundBinaryoperatorkind.Equals;
-                        case SyntaxKind.ampersandAmpersandToken:
+                        case GuidanceSignalKind.ampersandAmpersandToken:
                                 return BoundBinaryoperatorkind.LogicalAnd;
-                        case SyntaxKind.pipePipeToken:
+                        case GuidanceSignalKind.pipePipeToken:
                                 return BoundBinaryoperatorkind.LogicalOr;
                         default:
                                 throw new Exception($"unexpected binary syntax{kind}");
@@ -276,15 +279,15 @@ internal class Binder
                 return new BoundBooleanexpression(value);
         }
 
-        private Boundunaryoperatorkind bindunaryoperatorkind(SyntaxKind kind)
+        private Boundunaryoperatorkind bindunaryoperatorkind(GuidanceSignalKind kind)
         {
                 switch (kind)
                 {
-                        case SyntaxKind.plusToken:
+                        case GuidanceSignalKind.plusToken:
                                 return Boundunaryoperatorkind.Identity;
-                        case SyntaxKind.minusToken:
+                        case GuidanceSignalKind.minusToken:
                                 return Boundunaryoperatorkind.Negation;
-                        case SyntaxKind.bangToken:
+                        case GuidanceSignalKind.bangToken:
                                 return Boundunaryoperatorkind.LogicalNegation;
                         default:
                                 throw new Exception($"{kind} not a unary operation in binder.cs line 90");

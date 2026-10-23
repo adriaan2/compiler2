@@ -14,9 +14,9 @@ internal sealed class Charsyntax : LiteralExpressionsyntax
     public Syntaxtoken CharacterValue { get; }
     public Syntaxtoken CloseQuote { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.charvaltoken;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.charvaltoken;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return OpenQuote;
         yield return CharacterValue;

@@ -1,11 +1,11 @@
 using bindings;
 
-internal sealed class BoundEvaluator
+internal sealed class Evaluator
 {
     private readonly Boundexpression _root;
     private  readonly Dictionary<VariableSymbol, object> _variables;
 
-    public BoundEvaluator(Boundexpression root, Dictionary<VariableSymbol, object> variables)
+    public Evaluator(Boundexpression root, Dictionary<VariableSymbol, object> variables)
     {
         _root = root;
         _variables = variables;
@@ -98,7 +98,7 @@ internal sealed class BoundEvaluator
         {
             if (_variables.TryGetValue(variable.Variable, out var value))
                 return value;
-
+                    
             throw new Exception($"Variable '{variable.Variable.Name}' was not assigned.");
         }
 

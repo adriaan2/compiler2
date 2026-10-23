@@ -9,13 +9,13 @@ sealed class BynarySyntax : LiteralExpressionsyntax
         Right = right;
     }
 
-    public override SyntaxKind Kind => SyntaxKind.binaryexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.binaryexpression;
 
     public LiteralExpressionsyntax Left { get; }
     public Syntaxtoken OperatorToken { get; }
     public LiteralExpressionsyntax Right { get; }
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Left;
         yield return OperatorToken;

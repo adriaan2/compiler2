@@ -7,10 +7,10 @@ sealed class numberSyntax : LiteralExpressionsyntax
         Token = token;
     }
 
-    public override SyntaxKind Kind => SyntaxKind.numberexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.numberexpression;
     public Syntaxtoken Token { get; }
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Token;
     }

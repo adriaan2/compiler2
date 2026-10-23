@@ -55,7 +55,7 @@ public class Lexer
                 if (_position >= _text.Length)
                 {
                        
-                        return new Syntaxtoken(SyntaxKind.endoffiletoken, _position, "\0", null);
+                        return new Syntaxtoken(GuidanceSignalKind.endoffiletoken, _position, "\0", null);
                 }
 
                 if (char.IsLetter(Current))
@@ -71,22 +71,22 @@ public class Lexer
 
                         var kind = text switch
                         {
-                                "char" => SyntaxKind.charkeyword,
-                                "true" => SyntaxKind.trueKeyword,
-                                "false" => SyntaxKind.falseKeyword,
-                                "int" => SyntaxKind.intKeyword,
-                                "bool" => SyntaxKind.boolKeyword,
-                                "if" => SyntaxKind.ifToken,
-                                "else" => SyntaxKind.elseToken,
-                                "for" => SyntaxKind.forToken,
-                                "while" => SyntaxKind.whileToken,
-                                _ => SyntaxKind.identifierToken
+                                "char" => GuidanceSignalKind.charkeyword,
+                                "true" => GuidanceSignalKind.trueKeyword,
+                                "false" => GuidanceSignalKind.falseKeyword,
+                                "int" => GuidanceSignalKind.intKeyword,
+                                "bool" => GuidanceSignalKind.boolKeyword,
+                                "if" => GuidanceSignalKind.ifToken,
+                                "else" => GuidanceSignalKind.elseToken,
+                                "for" => GuidanceSignalKind.forToken,
+                                "while" => GuidanceSignalKind.whileToken,
+                                _ => GuidanceSignalKind.identifierToken
                         };
 
                         object? value = kind switch
                         {
-                                SyntaxKind.trueKeyword => true,
-                                SyntaxKind.falseKeyword => false,
+                                GuidanceSignalKind.trueKeyword => true,
+                                GuidanceSignalKind.falseKeyword => false,
                                 _ => null
                         };
                         
@@ -110,7 +110,7 @@ public class Lexer
                                 _diagnostics.Add($"Invalid number literal '{text}'.");
                         }
 
-                        return new Syntaxtoken(SyntaxKind.numberToken, start, text, value);
+                        return new Syntaxtoken(GuidanceSignalKind.numberToken, start, text, value);
                 }
 
                 if (char.IsWhiteSpace(Current))
@@ -123,78 +123,78 @@ public class Lexer
 
                         var length = _position - start;
                         var text = _text.Substring(start, length);
-                        return new Syntaxtoken(SyntaxKind.whitespaceToken, start, text, null);
+                        return new Syntaxtoken(GuidanceSignalKind.whitespaceToken, start, text, null);
                 }
                  if (Current == '{')
                 {
-                        return new Syntaxtoken(SyntaxKind.opencurly, _position++, "{", null);
+                        return new Syntaxtoken(GuidanceSignalKind.opencurly, _position++, "{", null);
                 }
                  if (Current == '}')
                         {
-                                return new Syntaxtoken(SyntaxKind.closedcurly, _position++, "}", null);
+                                return new Syntaxtoken(GuidanceSignalKind.closedcurly, _position++, "}", null);
                         }
 
                 if (Current == '+')
                 {
-                        return new Syntaxtoken(SyntaxKind.plusToken, _position++, "+", null);
+                        return new Syntaxtoken(GuidanceSignalKind.plusToken, _position++, "+", null);
                 }
                 else if (Current == '[')
                 {
-                        return new Syntaxtoken(SyntaxKind.openbracket, _position++, "[", null);
+                        return new Syntaxtoken(GuidanceSignalKind.openbracket, _position++, "[", null);
                 }
                 else if (Current == ']')
                 {
-                        return new Syntaxtoken(SyntaxKind.closebracket, _position++, "]", null);
+                        return new Syntaxtoken(GuidanceSignalKind.closebracket, _position++, "]", null);
                 }
                 else if (Current == ',')
                 {
-                        return new Syntaxtoken(SyntaxKind.commaToken, _position++, ",", null);
+                        return new Syntaxtoken(GuidanceSignalKind.commaToken, _position++, ",", null);
                 }
                 else if (Current == '=' && Lookahead != '=')
                 {
-                        return new Syntaxtoken(SyntaxKind.equalsToken, _position++, "=", null);
+                        return new Syntaxtoken(GuidanceSignalKind.equalsToken, _position++, "=", null);
                 }
                 else if (Current == '=' && Lookahead == '=')
                 {
                         var position = _position;
                         _position += 2;
-                        return new Syntaxtoken(SyntaxKind.equalsEqualsToken, position, "==", null);
+                        return new Syntaxtoken(GuidanceSignalKind.equalsEqualsToken, position, "==", null);
                 }
                 else if (Current == '-')
                 {
-                        return new Syntaxtoken(SyntaxKind.minusToken, _position++, "-", null);
+                        return new Syntaxtoken(GuidanceSignalKind.minusToken, _position++, "-", null);
                 }
                 else if (Current == '/')
                 {
-                        return new Syntaxtoken(SyntaxKind.slashtoken, _position++, "/", null);
+                        return new Syntaxtoken(GuidanceSignalKind.slashtoken, _position++, "/", null);
                 }
                 else if (Current == '(')
                 {
-                        return new Syntaxtoken(SyntaxKind.openparen, _position++, "(", null);
+                        return new Syntaxtoken(GuidanceSignalKind.openparen, _position++, "(", null);
                 }
                 else if (Current == ')')
                 {
-                        return new Syntaxtoken(SyntaxKind.closedparen, _position++, ")", null);
+                        return new Syntaxtoken(GuidanceSignalKind.closedparen, _position++, ")", null);
                 }
                 else if (Current == '*')
                 {
-                        return new Syntaxtoken(SyntaxKind.timestoken, _position++, "*", null);
+                        return new Syntaxtoken(GuidanceSignalKind.timestoken, _position++, "*", null);
                 }
                 else if (Current == '!')
                 {
-                        return new Syntaxtoken(SyntaxKind.bangToken, _position++, "!", null);
+                        return new Syntaxtoken(GuidanceSignalKind.bangToken, _position++, "!", null);
                 }
                 else if (Current == '&' && Lookahead == '&')
                 {
                         var position = _position;
                         _position += 2;
-                        return new Syntaxtoken(SyntaxKind.ampersandAmpersandToken, position, "&&", null);
+                        return new Syntaxtoken(GuidanceSignalKind.ampersandAmpersandToken, position, "&&", null);
                 }
                 else if (Current == '|' && Lookahead == '|')
                 {
                         var position = _position;
                         _position += 2;
-                        return new Syntaxtoken(SyntaxKind.pipePipeToken, position, "||", null);
+                        return new Syntaxtoken(GuidanceSignalKind.pipePipeToken, position, "||", null);
                 }
                 else if (Current == '\'')
                 {
@@ -204,7 +204,7 @@ public class Lexer
                         if (Current == '\0')
                         {
                                 _diagnostics.Add("Unterminated char literal.");
-                                return new Syntaxtoken(SyntaxKind.badtoken, start, "'", null);
+                                return new Syntaxtoken(GuidanceSignalKind.badtoken, start, "'", null);
                         }
 
                         var charValue = Current;
@@ -214,23 +214,23 @@ public class Lexer
                         if (Current != '\'')
                         {
                                 _diagnostics.Add("Char literal must contain exactly one character.");
-                                return new Syntaxtoken(SyntaxKind.badtoken, start, _text.Substring(start, _position - start), null);
+                                return new Syntaxtoken(GuidanceSignalKind.badtoken, start, _text.Substring(start, _position - start), null);
                         }
 
                         Next();
 
                         var text = _text.Substring(start, _position - start);
 
-                        return new Syntaxtoken(SyntaxKind.charvaltoken, _position, text, charValue);
+                        return new Syntaxtoken(GuidanceSignalKind.charvaltoken, _position, text, charValue);
                 }
 
                 if (Current == ';')
                 {
                         
-                        return new Syntaxtoken(SyntaxKind.endoffiletoken, _position++, ";", null);
+                        return new Syntaxtoken(GuidanceSignalKind.endoffiletoken, _position++, ";", null);
                 }
 
                 _diagnostics.Add($"error bad character input in lexer last line {Current}");
-                return new Syntaxtoken(SyntaxKind.badtoken, _position++, _text.Substring(_position - 1, 1), null);
+                return new Syntaxtoken(GuidanceSignalKind.badtoken, _position++, _text.Substring(_position - 1, 1), null);
         }
 }

@@ -7,7 +7,7 @@ Right now the project can parse, bind, and evaluate literals, unary operators, b
 - `Lexer` treats alphabetic text as either `true` / `false` or a bad token.
 - `Parser` only builds literal, unary, binary, boolean, and parenthesized expressions.
 - `Binder` has no symbol table and no bound nodes for variable reads or writes.
-- `BoundEvaluator` has no variable storage.
+- `Evaluator` has no variable storage.
 
 That means the language can understand values, but not names for values.
 
@@ -53,7 +53,7 @@ New syntax files that will likely be needed:
 
 Work:
 
-- Add `identifierToken` to `SyntaxKind`
+- Add `identifierToken` to `GuidanceSignalKind`
 - Add `equalsToken` for single `=`
 - Keep `equalsEqualsToken` for `==`
 - Change the lexer so alphabetic text becomes:
@@ -111,12 +111,12 @@ That keeps the binder simple and preserves the project's current type-checking d
 
 Files to update:
 
-- `syntaxanalysis/bindings/BoundEvaluator.cs`
+- `syntaxanalysis/bindings/Evaluator.cs`
 - `Program.cs`
 
 Work:
 
-- Pass a variable storage dictionary into `BoundEvaluator`
+- Pass a variable storage dictionary into `Evaluator`
 - Evaluate variable reads by looking up the stored value
 - Evaluate assignments by:
   - evaluating the right-hand side
@@ -164,13 +164,13 @@ Because variables need persistent state, some tests should create a shared varia
 
 ## Suggested Implementation Order
 
-1. Add `identifierToken` and `equalsToken` in `SyntaxKind`
+1. Add `identifierToken` and `equalsToken` in `GuidanceSignalKind`
 2. Teach `Lexer` to recognize identifiers and single `=`
 3. Add name-expression and assignment-expression syntax nodes
 4. Update `Parser` to parse assignments and identifier expressions
 5. Add bound node kinds and bound expression types for variables
 6. Add a variable symbol table to `Binder`
-7. Update `BoundEvaluator` to read and write variables
+7. Update `Evaluator` to read and write variables
 8. Update `Program.cs` so variables persist across REPL inputs
 9. Add smoke tests for happy paths and diagnostics
 

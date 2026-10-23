@@ -8,9 +8,9 @@ sealed class NameExpressionSyntax : LiteralExpressionsyntax
     }
 
     public Syntaxtoken IdentifierToken { get; }
-    public override SyntaxKind Kind => SyntaxKind.nameexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.nameexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return IdentifierToken;
     }

@@ -8,9 +8,9 @@ sealed class BooleanSyntax : LiteralExpressionsyntax
     }
 
     public Syntaxtoken KeywordToken { get; }
-    public override SyntaxKind Kind => SyntaxKind.booleanexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.booleanexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return KeywordToken;
     }

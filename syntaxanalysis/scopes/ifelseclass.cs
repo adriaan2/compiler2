@@ -24,9 +24,9 @@
 //     public Syntaxtoken CloseParen { get; }
 //     public ElseClauseSyntax? ElseClause { get; }
 
-//     public override SyntaxKind Kind => SyntaxKind.ifexpression;
+//     public override GuidanceSignalKind Kind => GuidanceSignalKind.ifexpression;
 
-//     public override IEnumerable<SyntaxNode> getchildren()
+//     public override IEnumerable<GuidanceSignalNode> getchildren()
 //     {
 //         yield return IfKeyword;
 //         yield return OpenParen;
@@ -40,18 +40,18 @@
 
 // public sealed class ElseClauseSyntax : BlockStatementSyntax
 // {
-//     public ElseClauseSyntax(Syntaxtoken elseKeyword, SyntaxNode elseStatement)
+//     public ElseClauseSyntax(Syntaxtoken elseKeyword, GuidanceSignalNode elseStatement)
 //     {
 //         ElseKeyword = elseKeyword;
 //         ElseStatement = elseStatement;
 //     }
 
 //     public Syntaxtoken ElseKeyword { get; }
-//     public SyntaxNode ElseStatement { get; }
+//     public GuidanceSignalNode ElseStatement { get; }
 
-//     public override SyntaxKind Kind => SyntaxKind.elsekeyword;
+//     public override GuidanceSignalKind Kind => GuidanceSignalKind.elsekeyword;
 
-//     public override IEnumerable<SyntaxNode> getchildren()
+//     public override IEnumerable<GuidanceSignalNode> getchildren()
 //     {
 //         yield return ElseKeyword;
 //         yield return ElseStatement;

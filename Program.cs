@@ -1,4 +1,4 @@
-﻿using bindings;
+using bindings;
 using System.Collections.Generic;
 using syntaxer;
 using syntaxer.scopes;
@@ -25,13 +25,13 @@ public  class Program
             return;
         }
 
-        var stack = new Stack(sourceText);
-        stack.Parse();
+        var scopeParser = new ScopeParser(sourceText);
+        scopeParser.Parse();
 
-        if (stack.Diagnostics.Any())
+        if (scopeParser.Diagnostics.Any())
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            foreach (var item2 in stack.Diagnostics)
+            foreach (var item2 in scopeParser.Diagnostics)
             {
                 System.Console.WriteLine(item2);
             }

@@ -13,9 +13,9 @@ sealed class AssignmentExpressionSyntax : LiteralExpressionsyntax
     public Syntaxtoken EqualsToken { get; }
     public LiteralExpressionsyntax Expression { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.assignmentexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.assignmentexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return IdentifierToken;
         yield return EqualsToken;

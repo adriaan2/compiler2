@@ -13,9 +13,9 @@ sealed class ArrayExpressionSyntax : LiteralExpressionsyntax
     public IReadOnlyList<LiteralExpressionsyntax> Elements { get; }
     public Syntaxtoken CloseBracketToken { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.arrayexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.arrayexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return OpenBracketToken;
 

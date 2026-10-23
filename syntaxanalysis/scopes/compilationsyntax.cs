@@ -2,7 +2,7 @@ namespace syntaxer.scopes;
 
 using syntaxer;
 
-public class CompilationUnitSyntax : SyntaxNode
+public class CompilationUnitSyntax : GuidanceSignalNode
 {
     public CompilationUnitSyntax(IReadOnlyList<LiteralExpressionsyntax> statements, Syntaxtoken eof)
     {
@@ -13,9 +13,9 @@ public class CompilationUnitSyntax : SyntaxNode
     public IReadOnlyList<LiteralExpressionsyntax> Statements { get; }
     public Syntaxtoken EndOfFileToken { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.compilationunit;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.compilationunit;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         foreach (var statement in Statements)
             yield return statement;

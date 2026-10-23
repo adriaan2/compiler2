@@ -10,9 +10,9 @@ public sealed class closingsyntax : LiteralExpressionsyntax
 
     public Syntaxtoken SemicolonToken { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.semicolonToken;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.semicolonToken;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return SemicolonToken;
     }

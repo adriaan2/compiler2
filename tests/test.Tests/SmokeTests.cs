@@ -34,9 +34,9 @@ public class SmokeTests
 
 
     // [Fact]
-    // public void Stack_Parse_GroupsTextBetweenCurlyBraces()
+    // public void ScopeParser_Parse_GroupsTextBetweenCurlyBraces()
     // {
-    //     var logic = new Stack("""
+    //     var logic = new ScopeParser("""
     //     {
     //         int d=0;
             
@@ -53,9 +53,9 @@ public class SmokeTests
     // }
 
     // [Fact]
-    // public void Stack_Parse_ReportsUnclosedCurlyBraceAtEndOfText()
+    // public void ScopeParser_Parse_ReportsUnclosedCurlyBraceAtEndOfText()
     // {
-    //     var logic = new Stack("""
+    //     var logic = new ScopeParser("""
     //     {
     //         1
     //     """);
@@ -267,7 +267,7 @@ public class SmokeTests
         if (binder.Diagnostics.Any())
             throw new XunitException($"Binder failed for '{text}' with diagnostics: {string.Join(", ", binder.Diagnostics)}");
 
-        var evaluator = new BoundEvaluator(boundExpression, variables);
+        var evaluator = new Evaluator(boundExpression, variables);
         return evaluator.Evaluate();
     }
 

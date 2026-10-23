@@ -9,9 +9,9 @@ public sealed class sentenceunits:LiteralExpressionsyntax
 
     public IReadOnlyList<LiteralExpressionsyntax> Statements { get; }
 
-    public override SyntaxKind Kind => throw new NotImplementedException();
+    public override GuidanceSignalKind Kind => throw new NotImplementedException();
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         throw new NotImplementedException();
     }

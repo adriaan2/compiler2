@@ -17,9 +17,9 @@ public sealed class Ifsyntax : LiteralExpressionsyntax
     public LiteralExpressionsyntax Condition { get; }
     public Syntaxtoken SemicolonToken { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.ifexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.ifexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return IfToken;
         yield return Condition;

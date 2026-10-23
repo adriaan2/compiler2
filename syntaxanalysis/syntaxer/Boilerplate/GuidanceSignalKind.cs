@@ -1,6 +1,6 @@
 namespace syntaxer;
 
-public enum SyntaxKind
+public enum GuidanceSignalKind
 {
     ifexpression,
     ifToken,
