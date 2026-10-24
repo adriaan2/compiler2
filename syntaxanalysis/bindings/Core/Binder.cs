@@ -47,9 +47,38 @@ internal class Binder
                                 return Bindarrayindexexpression((ArrayIndexExpressionSyntax)expressionsyntax);
                         case GuidanceSignalKind.ifexpression:
                                 return Bindifexpression((Ifsyntax)expressionsyntax);
+                        case GuidanceSignalKind.functioncallExpression:
+                                return BindFunctionCall((FunctionCallSyntax)expressionsyntax);
                         default:
                                 throw new Exception($"unkown syntax{expressionsyntax.Kind}");
                 }
+        }
+
+        private Boundexpression BindFunctionCall(FunctionCallSyntax syntax)
+        {
+                var name = syntax.Identifier.Text ?? string.Empty;
+                if (!_scope.FunctionMap.TryGet(name, out var function))
+                {
+                        _diagnostocs.Add($"Function '{name}' does not exist.");
+                        return new BoundNumberexpression(0);
+                }
+
+                var arguments = syntax.Arguments.Select(Bind).ToArray();
+                if (arguments.Length != function.Parameters.Count)
+                {
+                        throw new InvalidOperationException(
+                                $"Function '{name}' expects {function.Parameters.Count} argument(s), received {arguments.Length}.");
+                }
+
+                for (var i = 0; i < arguments.Length; i++)
+                {
+                        var parameter = function.Parameters[i];
+                        if (arguments[i].Type != parameter.Type ||
+                            (parameter.Type == typeof(ArrayValue) && GetArrayElementType(arguments[i]) != parameter.ElementType))
+                                _diagnostocs.Add($"Argument {i + 1} to function '{name}' must be of type {GetDisplayTypeName(parameter.Type, parameter.ElementType)}.");
+                }
+
+                return new BoundFunctionCallExpression(function, _scope.FunctionMap, arguments);
         }
 
         private Boundexpression Bindunarysyntax(UnarySyntax expressionsyntax)
@@ -77,13 +106,16 @@ internal class Binder
         // Binds an if-statement and evaluates its condition. Returns true when the
         // condition is true (the block should be entered), false when it is false
         // (the caller should skip the block instead of recursing into it).
-        public bool ShouldEnterIfBlock(Ifsyntax ifStatement, Dictionary<VariableSymbol, object> variables)
+        public bool ShouldEnterConditionalBlock(LiteralExpressionsyntax conditionSyntax, Dictionary<VariableSymbol, object> variables)
         {
-                var bound = (BoundIfexpression)Bindifexpression(ifStatement);
-                if (bound.Condition.Type != typeof(bool))
+                var condition = Bind(conditionSyntax);
+                if (condition.Type != typeof(bool))
+                {
+                        _diagnostocs.Add("Conditional condition must be a boolean expression");
                         return false;
+                }
 
-                var value = new Evaluator(bound.Condition, variables).Evaluate();
+                var value = new Evaluator(condition, variables).Evaluate();
                 return value is bool result && result;
         }
 
@@ -132,8 +164,7 @@ internal class Binder
                 // cannot be declared again. Sibling scopes remain independent.
                 if (_scope.TryLookupVariable(name, out _))
                 {
-                        _diagnostocs.Add($"Variable '{name}' is already declared in this or an enclosing scope.");
-                        return new BoundNumberexpression(0);
+                        throw new InvalidOperationException($"Variable '{name}' is already declared in this or an enclosing scope.");
                 }
 
                 var initializer = Bind(expressionsyntax.Initializer);
@@ -252,6 +283,10 @@ internal class Binder
                                 return BoundBinaryoperatorkind.division;
                         case GuidanceSignalKind.equalsEqualsToken:
                                 return BoundBinaryoperatorkind.Equals;
+                        case GuidanceSignalKind.lessToken:
+                                return BoundBinaryoperatorkind.LessThan;
+                        case GuidanceSignalKind.greaterToken:
+                                return BoundBinaryoperatorkind.GreaterThan;
                         case GuidanceSignalKind.ampersandAmpersandToken:
                                 return BoundBinaryoperatorkind.LogicalAnd;
                         case GuidanceSignalKind.pipePipeToken:
@@ -316,7 +351,9 @@ internal class Binder
                             || operatorKind == BoundBinaryoperatorkind.subtraction
                             || operatorKind == BoundBinaryoperatorkind.times
                             || operatorKind == BoundBinaryoperatorkind.division
-                            || operatorKind == BoundBinaryoperatorkind.Equals;
+                            || operatorKind == BoundBinaryoperatorkind.Equals
+                            || operatorKind == BoundBinaryoperatorkind.LessThan
+                            || operatorKind == BoundBinaryoperatorkind.GreaterThan;
                 }
 
                 if (leftType == typeof(bool))
@@ -362,6 +399,7 @@ internal class Binder
                         BoundVariableexpression variableExpression => variableExpression.Variable.ElementType,
                         BoundVariabledeclarationexpression declarationExpression => declarationExpression.Variable.ElementType,
                         BoundAssignmentexpression assignmentExpression => assignmentExpression.Variable.ElementType,
+                        BoundFunctionCallExpression functionCallExpression => functionCallExpression.Function.ReturnElementType,
                         _ => null
                 };
         }

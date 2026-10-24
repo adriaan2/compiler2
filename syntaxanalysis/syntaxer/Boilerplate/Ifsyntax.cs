@@ -6,23 +6,23 @@ namespace syntaxer;
 // expression, and the closing `;` token.
 public sealed class Ifsyntax : LiteralExpressionsyntax
 {
-    public Ifsyntax(Syntaxtoken ifToken, LiteralExpressionsyntax condition, Syntaxtoken semicolonToken)
-    {
-        IfToken = ifToken;
-        Condition = condition;
-        SemicolonToken = semicolonToken;
-    }
+        public Ifsyntax(Syntaxtoken ifToken, LiteralExpressionsyntax condition, Syntaxtoken semicolonToken)
+        {
+                IfToken = ifToken;
+                Condition = condition;
+                SemicolonToken = semicolonToken;
+        }
 
-    public Syntaxtoken IfToken { get; }
-    public LiteralExpressionsyntax Condition { get; }
-    public Syntaxtoken SemicolonToken { get; }
+        public Syntaxtoken IfToken { get; }
+        public LiteralExpressionsyntax Condition { get; }
+        public Syntaxtoken SemicolonToken { get; }
 
-    public override GuidanceSignalKind Kind => GuidanceSignalKind.ifexpression;
+        public override GuidanceSignalKind Kind => GuidanceSignalKind.ifexpression;
 
-    public override IEnumerable<GuidanceSignalNode> getchildren()
-    {
-        yield return IfToken;
-        yield return Condition;
-        yield return SemicolonToken;
-    }
+        public override IEnumerable<GuidanceSignalNode> getchildren()
+        {
+                yield return IfToken;
+                yield return Condition;
+                yield return SemicolonToken;
+        }
 }

@@ -6,9 +6,10 @@ using bindings;
 namespace syntaxer;
 
 public class Parser
-{       private Syntaxtoken Current => Peek(0);
+{
+        private Syntaxtoken Current => Peek(0);
 
-        static bool subparsing=false;
+        static bool subparsing = false;
         List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
         int _position = 0;
@@ -18,7 +19,7 @@ public class Parser
 
         public Parser(string Text)
         {
-                
+
                 Lexer lexer = new Lexer(Text);
                 Syntaxtoken syntaxtoken;
                 List<Syntaxtoken> tokens = new();
@@ -29,7 +30,7 @@ public class Parser
                         if (syntaxtoken.Kind != GuidanceSignalKind.whitespaceToken && syntaxtoken.Kind != GuidanceSignalKind.badtoken)
                         {
                                 tokens.Add(syntaxtoken);
-                                
+
                         }
                 } while (syntaxtoken.Kind != GuidanceSignalKind.endoffiletoken);
 
@@ -64,34 +65,38 @@ public class Parser
                 return new Syntaxtoken(kind, Current.POsition, null, null);
         }
 
-  
-               
-        
-     
+
+
+
+
 
         public LiteralExpressionsyntax parse()
         {
-                
-          
-                
+
+
+
 
                 return ParseExpression();
         }
 
         private LiteralExpressionsyntax ParseExpression()
-        {       
+        {
 
-                
+
                 if (IsTypeKeyword(Current.Kind))
                         return ParseVariableDeclaration();
 
                 if (Current.Kind == GuidanceSignalKind.identifierToken && Peek(1).Kind == GuidanceSignalKind.equalsToken)
                         return ParseAssignmentExpression();
-                if (Current.Kind==GuidanceSignalKind.iftkeyword)
+                if (Current.Kind == GuidanceSignalKind.iftkeyword)
                         return ParseIfStatement();
+                if (Current.Kind == GuidanceSignalKind.whileToken || Current.Kind == GuidanceSignalKind.forToken)
+                        return ParseLoopStatement();
+                if (Current.Kind == GuidanceSignalKind.returnToken)
+                        return ParseReturnStatement();
                 return ParseBinaryExpression();
         }
-       
+
         private LiteralExpressionsyntax ParseIfStatement()
         {
                 var ifToken = match(GuidanceSignalKind.iftkeyword, "if");
@@ -100,6 +105,29 @@ public class Parser
                 // that is what closes the statement here.
                 var semicolon = match(GuidanceSignalKind.endoffiletoken, "semicolon");
                 return new Ifsyntax(ifToken, condition, semicolon);
+        }
+
+        private LiteralExpressionsyntax ParseLoopStatement()
+        {
+                var keyword = Nexttoken();
+                var hasParentheses = Current.Kind == GuidanceSignalKind.openparen;
+                if (hasParentheses)
+                        Nexttoken();
+                var condition = ParseBinaryExpression();
+                if (hasParentheses)
+                        match(GuidanceSignalKind.closedparen, "')'");
+                match(GuidanceSignalKind.endoffiletoken, "semicolon");
+                return new LoopSyntax(keyword, condition);
+        }
+
+        private LiteralExpressionsyntax ParseReturnStatement()
+        {
+                var keyword = Nexttoken();
+                LiteralExpressionsyntax? expression = null;
+                if (Current.Kind != GuidanceSignalKind.endoffiletoken)
+                        expression = ParseBinaryExpression();
+                match(GuidanceSignalKind.endoffiletoken, "semicolon");
+                return new ReturnSyntax(keyword, expression);
         }
 
         private LiteralExpressionsyntax ParseVariableDeclaration()
@@ -181,6 +209,38 @@ public class Parser
                         left = new ArrayIndexExpressionSyntax(left, openBracket, index, closeBracket);
                 }
 
+                if (left is NameExpressionSyntax name &&
+                    Current.Kind == GuidanceSignalKind.openparen)
+                {
+                        Nexttoken();
+                        var arguments = new List<LiteralExpressionsyntax>();
+                        if (Current.Kind != GuidanceSignalKind.closedparen)
+                        {
+                                do
+                                {
+                                        arguments.Add(ParseBinaryExpression());
+                                        if (Current.Kind != GuidanceSignalKind.commaToken)
+                                                break;
+                                        Nexttoken();
+                                } while (true);
+                        }
+                        match(GuidanceSignalKind.closedparen, "')'");
+                        left = new FunctionCallSyntax(name.IdentifierToken, arguments);
+                }
+
+                if (left is NameExpressionSyntax incrementName &&
+                    (Current.Kind == GuidanceSignalKind.incrementToken || Current.Kind == GuidanceSignalKind.decrementToken))
+                {
+                        var op = Nexttoken();
+                        var arithmeticToken = new Syntaxtoken(
+                                op.Kind == GuidanceSignalKind.incrementToken ? GuidanceSignalKind.plusToken : GuidanceSignalKind.minusToken,
+                                op.POsition, op.Text, null);
+                        var one = new numberSyntax(new Syntaxtoken(GuidanceSignalKind.numberToken, op.POsition, "1", 1));
+                        var updated = new BynarySyntax(new NameExpressionSyntax(incrementName.IdentifierToken), arithmeticToken, one);
+                        var equals = new Syntaxtoken(GuidanceSignalKind.equalsToken, op.POsition, "=", null);
+                        left = new AssignmentExpressionSyntax(incrementName.IdentifierToken, equals, updated);
+                }
+
                 return left;
         }
 
@@ -214,10 +274,10 @@ public class Parser
                         var identifierToken = Nexttoken();
                         return new NameExpressionSyntax(identifierToken);
                 }
-                if (Current.Kind==GuidanceSignalKind.pipePipeToken)
+                if (Current.Kind == GuidanceSignalKind.pipePipeToken)
                 {
-                       // System.Console.WriteLine("pipePipetoken");
-                       // var identifierToken=Nexttoken();
+                        // System.Console.WriteLine("pipePipetoken");
+                        // var identifierToken=Nexttoken();
                 }
 
                 if (Current.Kind == GuidanceSignalKind.charvaltoken)
@@ -264,8 +324,8 @@ public class Parser
                 var closeBracket = match(GuidanceSignalKind.closebracket, "close bracket");
                 return new ArrayExpressionSyntax(openBracket, elements, closeBracket);
         }
-       
 
-        
-        
+
+
+
 }

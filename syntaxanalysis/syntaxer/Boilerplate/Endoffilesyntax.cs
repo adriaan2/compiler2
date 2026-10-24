@@ -1,7 +1,7 @@
 namespace syntaxer
 {
-    public class Endoffilesyntax
-    {
-        
-    }
+        public class Endoffilesyntax
+        {
+
+        }
 }

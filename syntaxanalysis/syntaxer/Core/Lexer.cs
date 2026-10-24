@@ -8,7 +8,7 @@ namespace syntaxer;
 public class Lexer
 {
         private readonly string _text;
-        
+
         private int _position;
         private readonly List<string> _diagnostics = new();
         public IEnumerable<string> Diagnostics => _diagnostics;
@@ -54,7 +54,7 @@ public class Lexer
         {
                 if (_position >= _text.Length)
                 {
-                       
+
                         return new Syntaxtoken(GuidanceSignalKind.endoffiletoken, _position, "\0", null);
                 }
 
@@ -80,6 +80,8 @@ public class Lexer
                                 "else" => GuidanceSignalKind.elseToken,
                                 "for" => GuidanceSignalKind.forToken,
                                 "while" => GuidanceSignalKind.whileToken,
+                                "void" => GuidanceSignalKind.voidKeyword,
+                                "return" => GuidanceSignalKind.returnToken,
                                 _ => GuidanceSignalKind.identifierToken
                         };
 
@@ -89,7 +91,7 @@ public class Lexer
                                 GuidanceSignalKind.falseKeyword => false,
                                 _ => null
                         };
-                        
+
 
                         return new Syntaxtoken(kind, start, text, value);
                 }
@@ -125,17 +127,23 @@ public class Lexer
                         var text = _text.Substring(start, length);
                         return new Syntaxtoken(GuidanceSignalKind.whitespaceToken, start, text, null);
                 }
-                 if (Current == '{')
+                if (Current == '{')
                 {
                         return new Syntaxtoken(GuidanceSignalKind.opencurly, _position++, "{", null);
                 }
-                 if (Current == '}')
-                        {
-                                return new Syntaxtoken(GuidanceSignalKind.closedcurly, _position++, "}", null);
-                        }
+                if (Current == '}')
+                {
+                        return new Syntaxtoken(GuidanceSignalKind.closedcurly, _position++, "}", null);
+                }
 
                 if (Current == '+')
                 {
+                        if (Lookahead == '+')
+                        {
+                                var position = _position;
+                                _position += 2;
+                                return new Syntaxtoken(GuidanceSignalKind.incrementToken, position, "++", null);
+                        }
                         return new Syntaxtoken(GuidanceSignalKind.plusToken, _position++, "+", null);
                 }
                 else if (Current == '[')
@@ -149,6 +157,20 @@ public class Lexer
                 else if (Current == ',')
                 {
                         return new Syntaxtoken(GuidanceSignalKind.commaToken, _position++, ",", null);
+                }
+                else if (Current == '-' && Lookahead == '-')
+                {
+                        var position = _position;
+                        _position += 2;
+                        return new Syntaxtoken(GuidanceSignalKind.decrementToken, position, "--", null);
+                }
+                else if (Current == '<')
+                {
+                        return new Syntaxtoken(GuidanceSignalKind.lessToken, _position++, "<", null);
+                }
+                else if (Current == '>')
+                {
+                        return new Syntaxtoken(GuidanceSignalKind.greaterToken, _position++, ">", null);
                 }
                 else if (Current == '=' && Lookahead != '=')
                 {
@@ -226,11 +248,11 @@ public class Lexer
 
                 if (Current == ';')
                 {
-                        
+
                         return new Syntaxtoken(GuidanceSignalKind.endoffiletoken, _position++, ";", null);
                 }
 
-                _diagnostics.Add($"error bad character input in lexer last line {Current}");
-                return new Syntaxtoken(GuidanceSignalKind.badtoken, _position++, _text.Substring(_position - 1, 1), null);
+
+                return new Syntaxtoken(GuidanceSignalKind.endoffiletoken, _position++, _text.Substring(_position - 1, 1), null);
         }
 }

@@ -2,19 +2,41 @@
 int q=9
 if (true)
 {
-    int entered=2;
+    int entered=9;
     int d=entered+q;
     char r='r'
     if(true){
         char s='e'
         
         if(s=='e'){
-         
-          
+         while(entered>0){
+            entered--;
+            
+         }
+           
             
         }
     }
 
    }
+   while(q>12){
+    q++
+   }
+   int calls=0;
+   void Touch() 
+   {
+                calls = calls + 1;
+                if(calls<10){
+                   Touch();
+                }
+                
+    }
+        Touch();
+int b(){
+    return 1;
+}
+char d(){
 
-int hello=9;
+}
+b();
+d();

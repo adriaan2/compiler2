@@ -2,125 +2,137 @@ using bindings;
 
 internal sealed class Evaluator
 {
-    private readonly Boundexpression _root;
-    private  readonly Dictionary<VariableSymbol, object> _variables;
+        private readonly Boundexpression _root;
+        private readonly Dictionary<VariableSymbol, object> _variables;
 
-    public Evaluator(Boundexpression root, Dictionary<VariableSymbol, object> variables)
-    {
-        _root = root;
-        _variables = variables;
-    }
-
-    public object Evaluate()
-    {
-        return EvaluateExpression(_root);
-    }
-
-    private  object EvaluateExpression(Boundexpression node)
-    {
-        if (node is BoundNumberexpression number)
-
-            return number.Value;
-
-        if (node is BoundBooleanexpression boolean)
-            {System.Console.WriteLine($"{boolean.Value}");
-            return boolean.Value;}
-
-        if (node is BoundArrayexpression arrayExpression)
+        public Evaluator(Boundexpression root, Dictionary<VariableSymbol, object> variables)
         {
-            var elements = arrayExpression.Elements
-                .Select(EvaluateExpression)
-                .ToArray();
-
-            return new ArrayValue(arrayExpression.ElementType, elements);
+                _root = root;
+                _variables = variables;
         }
 
-        if (node is Boundunaryexpression unary)
+        public object Evaluate()
         {
-            var operand = EvaluateExpression(unary.Operand);
-
-            switch (unary.Operatorkind)
-            {
-                case Boundunaryoperatorkind.Identity:
-                    System.Console.WriteLine($"{operand}");
-                    return (int)operand;
-                case Boundunaryoperatorkind.Negation:
-                    return -(int)operand;
-                case Boundunaryoperatorkind.LogicalNegation:
-                    return !(bool)operand;
-                default:
-                    throw new Exception($"Unexpected unary operator {unary.Operatorkind}");
-            }
+                return EvaluateExpression(_root);
         }
 
-        if (node is BoundBinaryexpression binary)
+        private object EvaluateExpression(Boundexpression node)
         {
-            var left = EvaluateExpression(binary.Left);
-            var right = EvaluateExpression(binary.Right);
+                if (node is BoundNumberexpression number)
 
-            switch (binary.Boundoperatorkind)
-            {
-                case BoundBinaryoperatorkind.addition:
-                    return (int)left + (int)right;
-                case BoundBinaryoperatorkind.subtraction:
-                    return (int)left - (int)right;
-                case BoundBinaryoperatorkind.times:
-                    return (int)left * (int)right;
-                case BoundBinaryoperatorkind.division:
-                    return (int)left / (int)right;
-                case BoundBinaryoperatorkind.Equals:
-                    return Equals(left, right);
-                case BoundBinaryoperatorkind.LogicalAnd:
-                    return (bool)left && (bool)right;
-                case BoundBinaryoperatorkind.LogicalOr:
-                    return (bool)left || (bool)right;
-                default:
-                    throw new Exception($"Unexpected binary operator {binary.Boundoperatorkind}");
-            }
+                        return number.Value;
+
+                if (node is BoundBooleanexpression boolean)
+                {
+                        System.Console.WriteLine($"{boolean.Value}");
+                        return boolean.Value;
+                }
+
+                if (node is BoundFunctionCallExpression functionCall)
+                {
+                        var arguments = functionCall.Arguments.Select(EvaluateExpression).ToArray();
+                        return functionCall.Functions.Invoke(functionCall.Function, arguments)!;
+                }
+
+                if (node is BoundArrayexpression arrayExpression)
+                {
+                        var elements = arrayExpression.Elements
+                            .Select(EvaluateExpression)
+                            .ToArray();
+
+                        return new ArrayValue(arrayExpression.ElementType, elements);
+                }
+
+                if (node is Boundunaryexpression unary)
+                {
+                        var operand = EvaluateExpression(unary.Operand);
+
+                        switch (unary.Operatorkind)
+                        {
+                                case Boundunaryoperatorkind.Identity:
+                                        System.Console.WriteLine($"{operand}");
+                                        return (int)operand;
+                                case Boundunaryoperatorkind.Negation:
+                                        return -(int)operand;
+                                case Boundunaryoperatorkind.LogicalNegation:
+                                        return !(bool)operand;
+                                default:
+                                        throw new Exception($"Unexpected unary operator {unary.Operatorkind}");
+                        }
+                }
+
+                if (node is BoundBinaryexpression binary)
+                {
+                        var left = EvaluateExpression(binary.Left);
+                        var right = EvaluateExpression(binary.Right);
+
+                        switch (binary.Boundoperatorkind)
+                        {
+                                case BoundBinaryoperatorkind.addition:
+                                        return (int)left + (int)right;
+                                case BoundBinaryoperatorkind.subtraction:
+                                        return (int)left - (int)right;
+                                case BoundBinaryoperatorkind.times:
+                                        return (int)left * (int)right;
+                                case BoundBinaryoperatorkind.division:
+                                        return (int)left / (int)right;
+                                case BoundBinaryoperatorkind.Equals:
+                                        return Equals(left, right);
+                                case BoundBinaryoperatorkind.LessThan:
+                                        return (int)left < (int)right;
+                                case BoundBinaryoperatorkind.GreaterThan:
+                                        return (int)left > (int)right;
+                                case BoundBinaryoperatorkind.LogicalAnd:
+                                        return (bool)left && (bool)right;
+                                case BoundBinaryoperatorkind.LogicalOr:
+                                        return (bool)left || (bool)right;
+                                default:
+                                        throw new Exception($"Unexpected binary operator {binary.Boundoperatorkind}");
+                        }
+                }
+                if (node is Boundcharexpression charexpression)
+                {
+                        return charexpression.Value;
+                }
+
+                if (node is BoundArrayindexexpression arrayIndex)
+                {
+                        var array = (ArrayValue)EvaluateExpression(arrayIndex.Array);
+                        var index = (int)EvaluateExpression(arrayIndex.Index);
+
+                        if (index < 0 || index >= array.Length)
+                                throw new Exception($"Array index '{index}' is out of bounds for length {array.Length}.");
+
+                        return array.Elements[index];
+                }
+
+                if (node is BoundVariableexpression variable)
+                {
+                        if (_variables.TryGetValue(variable.Variable, out var value))
+                                return value;
+
+                        throw new Exception($"Variable '{variable.Variable.Name}' was not assigned.");
+                }
+
+                if (node is BoundAssignmentexpression assignment)
+                {
+                        var value = EvaluateExpression(assignment.Expression);
+                        _variables[assignment.Variable] = value;
+                        return value;
+                }
+
+                if (node is BoundVariabledeclarationexpression declaration)
+                {
+                        var value = EvaluateExpression(declaration.Initializer);
+                        _variables[declaration.Variable] = value;
+                        return value;
+                }
+
+                if (node is Boundsemicolinexpression)
+                        return null!;
+
+
+
+                throw new Exception($"Unexpected bound node {node.Boundnodekind}");
         }
-        if (node is Boundcharexpression charexpression)
-        {
-            return charexpression.Value;
-        }
-
-        if (node is BoundArrayindexexpression arrayIndex)
-        {
-            var array = (ArrayValue)EvaluateExpression(arrayIndex.Array);
-            var index = (int)EvaluateExpression(arrayIndex.Index);
-
-            if (index < 0 || index >= array.Length)
-                throw new Exception($"Array index '{index}' is out of bounds for length {array.Length}.");
-
-            return array.Elements[index];
-        }
-
-        if (node is BoundVariableexpression variable)
-        {
-            if (_variables.TryGetValue(variable.Variable, out var value))
-                return value;
-                    
-            throw new Exception($"Variable '{variable.Variable.Name}' was not assigned.");
-        }
-
-        if (node is BoundAssignmentexpression assignment)
-        {
-            var value = EvaluateExpression(assignment.Expression);
-            _variables[assignment.Variable] = value;
-            return value;
-        }
-
-        if (node is BoundVariabledeclarationexpression declaration)
-        {
-            var value = EvaluateExpression(declaration.Initializer);
-            _variables[declaration.Variable] = value;
-            return value;
-        }
-
-        if (node is Boundsemicolinexpression)
-            return null!;
-          
-        
-
-        throw new Exception($"Unexpected bound node {node.Boundnodekind}");
-    }
 }
