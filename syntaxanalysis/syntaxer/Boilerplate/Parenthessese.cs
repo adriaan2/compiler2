@@ -16,9 +16,9 @@ sealed class Parenthessese:LiteralExpressionsyntax
     public Syntaxtoken Closeparenthesis { get; }
     public LiteralExpressionsyntax Expression { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.bracketexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.bracketexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Openparenthesis;
         yield return Expression;

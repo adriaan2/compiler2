@@ -10,9 +10,9 @@ sealed class UnarySyntax : LiteralExpressionsyntax
 
     public Syntaxtoken OperatorToken { get; }
     public LiteralExpressionsyntax Operand { get; }
-    public override SyntaxKind Kind => SyntaxKind.unaryexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.unaryexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return OperatorToken;
         yield return Operand;

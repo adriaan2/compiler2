@@ -3,9 +3,9 @@ using syntaxer;
 
 public class curlysyntax : LiteralExpressionsyntax
 {
-    public override SyntaxKind Kind => SyntaxKind.opencurly;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.opencurly;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         throw new NotImplementedException();
     }

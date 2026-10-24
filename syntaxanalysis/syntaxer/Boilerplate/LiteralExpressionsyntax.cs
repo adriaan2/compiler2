@@ -1,5 +1,5 @@
 namespace syntaxer;
 
-public abstract class LiteralExpressionsyntax : SyntaxNode
+public abstract class LiteralExpressionsyntax : GuidanceSignalNode
 {
 }

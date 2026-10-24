@@ -1,10 +1,10 @@
 
 namespace syntaxer;
 
-public class Evaluator
+public class SyntaxEvaluator
 {
     readonly LiteralExpressionsyntax _root;
-    public Evaluator(LiteralExpressionsyntax root)
+    public SyntaxEvaluator(LiteralExpressionsyntax root)
     {
         _root=root;
     }
@@ -28,13 +28,13 @@ public class Evaluator
 
             switch (b.OperatorToken.Kind)
             {
-                case SyntaxKind.plusToken:
+                case GuidanceSignalKind.plusToken:
                     return left + right;
-                case SyntaxKind.minusToken:
+                case GuidanceSignalKind.minusToken:
                     return left - right;
-                case SyntaxKind.timestoken:
+                case GuidanceSignalKind.timestoken:
                     return left * right;
-                case SyntaxKind.slashtoken:
+                case GuidanceSignalKind.slashtoken:
                     return left / right;
                 default:
                     throw new Exception($"Unexpected binary operator {b.OperatorToken.Kind}");
@@ -47,9 +47,9 @@ public class Evaluator
 
             switch (u.OperatorToken.Kind)
             {
-                case SyntaxKind.plusToken:
+                case GuidanceSignalKind.plusToken:
                     return operand;
-                case SyntaxKind.minusToken:
+                case GuidanceSignalKind.minusToken:
                     return -operand;
                 default:
                     throw new Exception($"Unexpected unary operator {u.OperatorToken.Kind}");

@@ -15,9 +15,9 @@ sealed class VariableDeclarationSyntax : LiteralExpressionsyntax
     public Syntaxtoken EqualsToken { get; }
     public LiteralExpressionsyntax Initializer { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.variabledeclarationexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.variabledeclarationexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return TypeClause;
         yield return Identifier;

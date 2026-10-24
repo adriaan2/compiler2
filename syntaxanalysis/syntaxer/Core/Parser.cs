@@ -14,7 +14,7 @@ public class Parser
         int _position = 0;
         public int Position => _position;
         readonly Syntaxtoken[] _tokens;
-        public Stack parentlogic;
+        public ScopeParser parentlogic;
 
         public Parser(string Text)
         {
@@ -26,12 +26,12 @@ public class Parser
                 do
                 {
                         syntaxtoken = lexer.Lex();
-                        if (syntaxtoken.Kind != SyntaxKind.whitespaceToken && syntaxtoken.Kind != SyntaxKind.badtoken)
+                        if (syntaxtoken.Kind != GuidanceSignalKind.whitespaceToken && syntaxtoken.Kind != GuidanceSignalKind.badtoken)
                         {
                                 tokens.Add(syntaxtoken);
                                 
                         }
-                } while (syntaxtoken.Kind != SyntaxKind.endoffiletoken);
+                } while (syntaxtoken.Kind != GuidanceSignalKind.endoffiletoken);
 
                 _diagnostics.AddRange(lexer.Diagnostics);
                 _tokens = tokens.ToArray();
@@ -55,7 +55,7 @@ public class Parser
         }
 
 
-        private Syntaxtoken match(SyntaxKind kind, string printable = "")
+        private Syntaxtoken match(GuidanceSignalKind kind, string printable = "")
         {
                 if (Current.Kind == kind)
                         return Nexttoken();
@@ -85,28 +85,28 @@ public class Parser
                 if (IsTypeKeyword(Current.Kind))
                         return ParseVariableDeclaration();
 
-                if (Current.Kind == SyntaxKind.identifierToken && Peek(1).Kind == SyntaxKind.equalsToken)
+                if (Current.Kind == GuidanceSignalKind.identifierToken && Peek(1).Kind == GuidanceSignalKind.equalsToken)
                         return ParseAssignmentExpression();
-                if (Current.Kind==SyntaxKind.iftkeyword)
+                if (Current.Kind==GuidanceSignalKind.iftkeyword)
                         return ParseIfStatement();
                 return ParseBinaryExpression();
         }
        
         private LiteralExpressionsyntax ParseIfStatement()
         {
-                var ifToken = match(SyntaxKind.iftkeyword, "if");
+                var ifToken = match(GuidanceSignalKind.iftkeyword, "if");
                 var condition = ParseBinaryExpression();
                 // The lexer represents the closing ';' as the end-of-file token, so
                 // that is what closes the statement here.
-                var semicolon = match(SyntaxKind.endoffiletoken, "semicolon");
+                var semicolon = match(GuidanceSignalKind.endoffiletoken, "semicolon");
                 return new Ifsyntax(ifToken, condition, semicolon);
         }
 
         private LiteralExpressionsyntax ParseVariableDeclaration()
         {
                 var typeClause = ParseTypeClause();
-                var identifier = match(SyntaxKind.identifierToken, "identifier");
-                var equals = match(SyntaxKind.equalsToken, "equal");
+                var identifier = match(GuidanceSignalKind.identifierToken, "identifier");
+                var equals = match(GuidanceSignalKind.equalsToken, "equal");
                 var initializer = ParseBinaryExpression();
                 return new VariableDeclarationSyntax(typeClause, identifier, equals, initializer);
         }
@@ -117,7 +117,7 @@ public class Parser
                 Syntaxtoken? openBracket = null;
                 Syntaxtoken? closeBracket = null;
 
-                if (Current.Kind == SyntaxKind.openbracket && Peek(1).Kind == SyntaxKind.closebracket)
+                if (Current.Kind == GuidanceSignalKind.openbracket && Peek(1).Kind == GuidanceSignalKind.closebracket)
                 {
                         openBracket = Nexttoken();
                         closeBracket = Nexttoken();
@@ -126,15 +126,15 @@ public class Parser
                 return new TypeClauseSyntax(keyword, openBracket, closeBracket);
         }
 
-        private static bool IsTypeKeyword(SyntaxKind kind)
+        private static bool IsTypeKeyword(GuidanceSignalKind kind)
         {
-                return kind == SyntaxKind.intKeyword || kind == SyntaxKind.boolKeyword || SyntaxKind.charkeyword == kind;
+                return kind == GuidanceSignalKind.intKeyword || kind == GuidanceSignalKind.boolKeyword || GuidanceSignalKind.charkeyword == kind;
         }
 
         private LiteralExpressionsyntax ParseAssignmentExpression()
         {
-                var identifier = match(SyntaxKind.identifierToken);
-                var equals = match(SyntaxKind.equalsToken, "equals");
+                var identifier = match(GuidanceSignalKind.identifierToken);
+                var equals = match(GuidanceSignalKind.equalsToken, "equals");
                 var expression = ParseBinaryExpression();
                 return new AssignmentExpressionSyntax(identifier, equals, expression);
         }
@@ -173,11 +173,11 @@ public class Parser
         {
                 var left = ParsePrimaryexpression();
 
-                while (Current.Kind == SyntaxKind.openbracket)
+                while (Current.Kind == GuidanceSignalKind.openbracket)
                 {
                         var openBracket = Nexttoken();
                         var index = ParseExpression();
-                        var closeBracket = match(SyntaxKind.closebracket, "close bracket");
+                        var closeBracket = match(GuidanceSignalKind.closebracket, "close bracket");
                         left = new ArrayIndexExpressionSyntax(left, openBracket, index, closeBracket);
                 }
 
@@ -186,52 +186,52 @@ public class Parser
 
         private LiteralExpressionsyntax ParsePrimaryexpression()
         {
-                if (Current.Kind == SyntaxKind.openbracket)
+                if (Current.Kind == GuidanceSignalKind.openbracket)
                 {
                         return ParseArrayExpression();
                 }
-                if (Current.Kind == SyntaxKind.semicolonToken)
+                if (Current.Kind == GuidanceSignalKind.semicolonToken)
                 {
                         return new closingsyntax(Nexttoken());
                 }
 
-                if (Current.Kind == SyntaxKind.openparen)
+                if (Current.Kind == GuidanceSignalKind.openparen)
                 {
                         var left = Nexttoken();
                         var expression = ParseBinaryExpression();
-                        var right = match(SyntaxKind.closedparen, "127");
+                        var right = match(GuidanceSignalKind.closedparen, "127");
                         return new Parenthessese(left, expression, right);
                 }
 
-                if (Current.Kind == SyntaxKind.trueKeyword || Current.Kind == SyntaxKind.falseKeyword)
+                if (Current.Kind == GuidanceSignalKind.trueKeyword || Current.Kind == GuidanceSignalKind.falseKeyword)
                 {
                         var keywordToken = Nexttoken();
                         return new BooleanSyntax(keywordToken);
                 }
 
-                if (Current.Kind == SyntaxKind.identifierToken)
+                if (Current.Kind == GuidanceSignalKind.identifierToken)
                 {
                         var identifierToken = Nexttoken();
                         return new NameExpressionSyntax(identifierToken);
                 }
-                if (Current.Kind==SyntaxKind.pipePipeToken)
+                if (Current.Kind==GuidanceSignalKind.pipePipeToken)
                 {
                        // System.Console.WriteLine("pipePipetoken");
                        // var identifierToken=Nexttoken();
                 }
 
-                if (Current.Kind == SyntaxKind.charvaltoken)
+                if (Current.Kind == GuidanceSignalKind.charvaltoken)
                 {
                         var charToken = Nexttoken();
-                        var openQuote = new Syntaxtoken(SyntaxKind.badtoken, charToken.POsition, "'", null);
+                        var openQuote = new Syntaxtoken(GuidanceSignalKind.badtoken, charToken.POsition, "'", null);
                         var characterText = charToken.Value?.ToString();
                         var characterValue = new Syntaxtoken(
-                                SyntaxKind.charvaltoken,
+                                GuidanceSignalKind.charvaltoken,
                                 charToken.POsition + 1,
                                 characterText,
                                 charToken.Value);
                         var closeQuote = new Syntaxtoken(
-                                SyntaxKind.badtoken,
+                                GuidanceSignalKind.badtoken,
                                 charToken.POsition + (charToken.Text?.Length ?? 0) - 1,
                                 "'",
                                 null);
@@ -239,29 +239,29 @@ public class Parser
                         return new Charsyntax(openQuote, characterValue, closeQuote);
                 }
 
-                var numberToken = match(SyntaxKind.numberToken, "141");
+                var numberToken = match(GuidanceSignalKind.numberToken, "141");
                 return new numberSyntax(numberToken);
         }
 
         private LiteralExpressionsyntax ParseArrayExpression()
         {
-                var openBracket = match(SyntaxKind.openbracket, "open bracket");
+                var openBracket = match(GuidanceSignalKind.openbracket, "open bracket");
                 var elements = new List<LiteralExpressionsyntax>();
 
-                if (Current.Kind != SyntaxKind.closebracket)
+                if (Current.Kind != GuidanceSignalKind.closebracket)
                 {
                         while (true)
                         {
                                 elements.Add(ParseExpression());
 
-                                if (Current.Kind != SyntaxKind.commaToken)
+                                if (Current.Kind != GuidanceSignalKind.commaToken)
                                         break;
 
                                 Nexttoken();
                         }
                 }
 
-                var closeBracket = match(SyntaxKind.closebracket, "close bracket");
+                var closeBracket = match(GuidanceSignalKind.closebracket, "close bracket");
                 return new ArrayExpressionSyntax(openBracket, elements, closeBracket);
         }
        

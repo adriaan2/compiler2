@@ -6,54 +6,61 @@ using System.Text;
 using syntaxer;
 
 
-public class Stack
+public class ScopeParser
 {
 
     //private object Iftoken;
-    public Stack ?Parent;
+    public ScopeParser ?Parent;
     private readonly string _sourcetext = null;
     private readonly List<string> _diagnostics = new();
-    private readonly List<Stack> _subblocks = new();
+    private readonly List<ScopeParser> _subblocks = new();
     // Set true when an if-statement's condition evaluates to false; the next
     // brace block is then skipped instead of being parsed and bound.
     private bool _skipNextBlock = false;
-    Dictionary<VariableSymbol,object> Variables=new();
+    private readonly Dictionary<VariableSymbol, object> _variables;
+    internal Dictionary<VariableSymbol, object> Variables => _variables;
     public Dictionary<string, VariableSymbol> VariableSymbols=new();
 
     // Looks up a variable by name in this scope, then walks up the parent chain.
     public bool TryLookupVariable(string name, out VariableSymbol variable)
     {
-        if (VariableSymbols.TryGetValue(name, out variable))
+        if (VariableSymbols.TryGetValue(name, out var localVariable))
+        {
+            variable = localVariable;
             return true;
+        }
 
         if (Parent is not null)
             return Parent.TryLookupVariable(name, out variable);
 
-        variable = null;
+        variable = null!;
         return false;
     }
     
 
-    public Stack(string sourcetext)
+    public ScopeParser(string sourcetext)
     {
         _sourcetext = sourcetext;
+        _variables = new Dictionary<VariableSymbol, object>();
     }
 
     // Wraps an existing symbol table as a scope (used when binding without parsing a full source block).
-    public Stack(Dictionary<string, VariableSymbol> variableSymbols)
+    public ScopeParser(Dictionary<string, VariableSymbol> variableSymbols)
     {
         VariableSymbols = variableSymbols;
+        _variables = new Dictionary<VariableSymbol, object>();
     }
-     public Stack(string sourcetext,Stack parent)
+     public ScopeParser(string sourcetext, ScopeParser parent)
     {
         _sourcetext = sourcetext;
         Parent=parent;
+        _variables = parent._variables;
     }
 
 
 
     public IEnumerable<string> Diagnostics => _diagnostics;
-    public IReadOnlyList<Stack> Subblocks => _subblocks;
+    public IReadOnlyList<ScopeParser> Subblocks => _subblocks;
 
     public IReadOnlyList<LiteralExpressionsyntax> Parse()
     {
@@ -147,8 +154,21 @@ public class Stack
         }
 
         Binder binder = new(this);
-        binder.Bind(expression);
+        var boundExpression = binder.Bind(expression);
         _diagnostics.AddRange(binder.Diagnostics);
+
+        if (!binder.Diagnostics.Any() && !parser.Diagnostics.Any())
+        {
+            try
+            {
+                new Evaluator(boundExpression, Variables).Evaluate();
+            }
+            catch (Exception exception)
+            {
+                _diagnostics.Add(exception.Message);
+            }
+        }
+
         System.Console.WriteLine();
     }
 
@@ -166,32 +186,30 @@ public class Stack
 
     private void ParseBlock(string blockText, List<LiteralExpressionsyntax> expressions)
     {
-        Stack subparser = new(blockText, this);
-        _subblocks.Add(subparser);
+        ScopeParser trigger = new(blockText, this);
+        _subblocks.Add(trigger);
 
         System.Console.WriteLine("{");
         System.Console.WriteLine();
-        var nested = subparser.Parse();
+        trigger.Parse();
         System.Console.WriteLine("}");
         System.Console.WriteLine();
 
-        _diagnostics.AddRange(subparser.Diagnostics);
-        foreach (var item in nested)
-        {
-            expressions.Add(item);
-        }
+        _diagnostics.AddRange(trigger.Diagnostics);
+        // Keep child statements in the child's result. Flattening them here
+        // would make them appear to belong to this scope downstream.
     }
 
     
 
     private sealed record ParseUnit(string Text, int Line);
 
-    public static void PrettyPrint(SyntaxNode node)
+    public static void PrettyPrint(GuidanceSignalNode node)
     {
         PrettyPrint(node, "", true);
     }
 
-    private static void PrettyPrint(SyntaxNode node, string indent, bool isLast)
+    private static void PrettyPrint(GuidanceSignalNode node, string indent, bool isLast)
     {
         var marker = indent == "" ? "" : (isLast ? "+--" : "+--");
         Console.WriteLine($"{indent}{marker}{GetNodeLabel(node)}");
@@ -203,39 +221,39 @@ public class Stack
             PrettyPrint(children[i], indent, i == children.Length - 1);
     }
 
-    private static string GetNodeLabel(SyntaxNode node)
+    private static string GetNodeLabel(GuidanceSignalNode node)
     {
         return node.Kind switch
         {
-            SyntaxKind.binaryexpression => "BinaryExpression",
-            SyntaxKind.unaryexpression => "UnaryExpression",
-            SyntaxKind.numberexpression => "NumberExpression",
-            SyntaxKind.booleanexpression => "BooleanExpression",
-            SyntaxKind.arrayexpression => "ArrayExpression",
-            SyntaxKind.arrayindexexpression => "ArrayIndexExpression",
-            SyntaxKind.typeclause => "TypeClause",
-            SyntaxKind.nameexpression => "NameExpression",
-            SyntaxKind.assignmentexpression => "AssignmentExpression",
-            SyntaxKind.variabledeclarationexpression => "VariableDeclarationExpression",
-            SyntaxKind.numberToken => $"NumberToken {(node as Syntaxtoken)?.Value}",
-            SyntaxKind.openbracket => "OpenBracketToken",
-            SyntaxKind.closebracket => "CloseBracketToken",
-            SyntaxKind.commaToken => "CommaToken",
-            SyntaxKind.identifierToken => $"IdentifierToken {(node as Syntaxtoken)?.Text}",
-            SyntaxKind.trueKeyword => "TrueKeyword",
-            SyntaxKind.falseKeyword => "FalseKeyword",
-            SyntaxKind.intKeyword => "IntKeyword",
-            SyntaxKind.boolKeyword => "BoolKeyword",
-            SyntaxKind.charkeyword => "CharKeyword",
-            SyntaxKind.equalsToken => "EqualsToken",
-            SyntaxKind.equalsEqualsToken => "EqualsEqualsToken",
-            SyntaxKind.plusToken => "PlusToken",
-            SyntaxKind.minusToken => "MinusToken",
-            SyntaxKind.timestoken => "StarToken",
-            SyntaxKind.slashtoken => "SlashToken",
-            SyntaxKind.bangToken => "BangToken",
-            SyntaxKind.ampersandAmpersandToken => "AmpersandAmpersandToken",
-            SyntaxKind.pipePipeToken => "PipePipeToken",
+            GuidanceSignalKind.binaryexpression => "BinaryExpression",
+            GuidanceSignalKind.unaryexpression => "UnaryExpression",
+            GuidanceSignalKind.numberexpression => "NumberExpression",
+            GuidanceSignalKind.booleanexpression => "BooleanExpression",
+            GuidanceSignalKind.arrayexpression => "ArrayExpression",
+            GuidanceSignalKind.arrayindexexpression => "ArrayIndexExpression",
+            GuidanceSignalKind.typeclause => "TypeClause",
+            GuidanceSignalKind.nameexpression => "NameExpression",
+            GuidanceSignalKind.assignmentexpression => "AssignmentExpression",
+            GuidanceSignalKind.variabledeclarationexpression => "VariableDeclarationExpression",
+            GuidanceSignalKind.numberToken => $"NumberToken {(node as Syntaxtoken)?.Value}",
+            GuidanceSignalKind.openbracket => "OpenBracketToken",
+            GuidanceSignalKind.closebracket => "CloseBracketToken",
+            GuidanceSignalKind.commaToken => "CommaToken",
+            GuidanceSignalKind.identifierToken => $"IdentifierToken {(node as Syntaxtoken)?.Text}",
+            GuidanceSignalKind.trueKeyword => "TrueKeyword",
+            GuidanceSignalKind.falseKeyword => "FalseKeyword",
+            GuidanceSignalKind.intKeyword => "IntKeyword",
+            GuidanceSignalKind.boolKeyword => "BoolKeyword",
+            GuidanceSignalKind.charkeyword => "CharKeyword",
+            GuidanceSignalKind.equalsToken => "EqualsToken",
+            GuidanceSignalKind.equalsEqualsToken => "EqualsEqualsToken",
+            GuidanceSignalKind.plusToken => "PlusToken",
+            GuidanceSignalKind.minusToken => "MinusToken",
+            GuidanceSignalKind.timestoken => "StarToken",
+            GuidanceSignalKind.slashtoken => "SlashToken",
+            GuidanceSignalKind.bangToken => "BangToken",
+            GuidanceSignalKind.ampersandAmpersandToken => "AmpersandAmpersandToken",
+            GuidanceSignalKind.pipePipeToken => "PipePipeToken",
             _ => node.Kind.ToString()
         };
     }

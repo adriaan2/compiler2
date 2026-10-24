@@ -8,9 +8,9 @@ sealed class ErrorSyntax : LiteralExpressionsyntax
     }
 
     public Syntaxtoken Token { get; }
-    public override SyntaxKind Kind => SyntaxKind.errorexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.errorexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Token;
     }

@@ -1,12 +1,20 @@
-if (false);
-{
-    int skipped=1;
-}
+
 int q=9
 if (true)
 {
     int entered=2;
     int d=entered+q;
+    char r='r'
+    if(true){
+        char s='e'
+        
+        if(s=='e'){
+         
+          
+            
+        }
+    }
 
+   }
 
-}
+int hello=9;

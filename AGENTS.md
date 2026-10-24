@@ -26,8 +26,8 @@ Current syntax support includes:
 
 Important syntax files:
 
-- `syntaxanalysis/syntaxer/Lexer.cs`
-- `syntaxanalysis/syntaxer/Parser.cs`
+- `syntaxanalysis/syntaxer/Core/Lexer.cs`
+- `syntaxanalysis/syntaxer/Core/Parser.cs`
 - `syntaxanalysis/syntaxer/Syntaxtoken.cs`
 - `syntaxanalysis/syntaxer/UnaryExpressionSyntax.cs`
 - `syntaxanalysis/syntaxer/Parenthessese.cs`
@@ -50,13 +50,14 @@ Current bound-node work includes:
 - `VariableSymbol`
 - Operator kind enums for unary and binary operations
 - `Binder` class that maps syntax nodes into bound expressions and enforces basic type rules
-- `BoundEvaluator` class that evaluates bound expressions against a variable store
+- `Evaluator` class that evaluates bound expressions against a variable store
 
 Important binding files:
 
-- `syntaxanalysis/bindings/Binder.cs`
-- `syntaxanalysis/bindings/bindings.cs`
-- `syntaxanalysis/bindings/enums.cs`
+- `syntaxanalysis/bindings/Core/Binder.cs`
+- `syntaxanalysis/bindings/Core/Evaluator.cs`
+- `syntaxanalysis/bindings/Boilerplate/VariableSymbol.cs`
+- `syntaxanalysis/scopes/ScopeParser.cs`
 
 ## Current Status
 The AST is in place and is more advanced than the original parser milestone. The parser currently handles arithmetic, boolean literals, char literals, variable declarations for `int`, `bool`, and `char`, name lookup, assignment expressions, logical operators, equality, precedence, unary expressions, and parentheses.

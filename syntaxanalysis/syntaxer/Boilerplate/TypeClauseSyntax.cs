@@ -1,6 +1,6 @@
 namespace syntaxer;
 
-sealed class TypeClauseSyntax : SyntaxNode
+sealed class TypeClauseSyntax : GuidanceSignalNode
 {
     public TypeClauseSyntax(Syntaxtoken keyword, Syntaxtoken? openBracketToken = null, Syntaxtoken? closeBracketToken = null)
     {
@@ -14,9 +14,9 @@ sealed class TypeClauseSyntax : SyntaxNode
     public Syntaxtoken? CloseBracketToken { get; }
     public bool IsArray => OpenBracketToken is not null && CloseBracketToken is not null;
 
-    public override SyntaxKind Kind => SyntaxKind.typeclause;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.typeclause;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Keyword;
 

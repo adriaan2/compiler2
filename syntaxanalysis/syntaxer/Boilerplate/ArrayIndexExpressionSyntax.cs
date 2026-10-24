@@ -15,9 +15,9 @@ sealed class ArrayIndexExpressionSyntax : LiteralExpressionsyntax
     public LiteralExpressionsyntax Index { get; }
     public Syntaxtoken CloseBracketToken { get; }
 
-    public override SyntaxKind Kind => SyntaxKind.arrayindexexpression;
+    public override GuidanceSignalKind Kind => GuidanceSignalKind.arrayindexexpression;
 
-    public override IEnumerable<SyntaxNode> getchildren()
+    public override IEnumerable<GuidanceSignalNode> getchildren()
     {
         yield return Target;
         yield return OpenBracketToken;
